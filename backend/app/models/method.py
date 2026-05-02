@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String
 class Method(Base):
     __tablename__ = 'methods'
     id = Column(Integer, primary_key=True)
-    method_id = Column(String(255))
+    method_legacy_id = Column(String(255))
     client = Column(String(255))
     
 

@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey
 class MethodTask(Base):
     __tablename__ = "method_tasks"
     id = Column(Integer, primary_key=True)
-    method_id = Column(Integer, ForeignKey("methods.id"))
+    method_id = Column(Integer, ForeignKey("methods.id"), nullable=False)
     type = Column(String(255))
     name = Column(String(255))
     description = Column(String(255))

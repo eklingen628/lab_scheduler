@@ -1,3 +1,4 @@
+from .document import Document
 from .default_task import DefaultTask
 from .method_alias import MethodAlias
 from .method import Method

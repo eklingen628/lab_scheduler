@@ -6,6 +6,7 @@ class SampleTest(Base):
     __tablename__ = 'sample_tests'
     id = Column(Integer, primary_key=True)
     group_id = Column(Integer, ForeignKey("sample_test_groups.id"))
+    method_id = Column(Integer, ForeignKey("methods.id"), nullable=True)
     test_key = Column(Integer, unique=True, index=True, nullable=False)
     
     project = Column(String(255))
@@ -24,7 +25,6 @@ class SampleTest(Base):
     peer_reviewer = Column(String(255))
     qa_submitted = Column(Boolean)
     interval = Column(String(255))
-    method_legacy_ids = Column(String(255))
     number_of = Column(Integer)
     status = Column(String(255))
     gl_assign = Column(String(255))

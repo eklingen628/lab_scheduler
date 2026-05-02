@@ -1,9 +1,9 @@
 from app.db import Base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from app.models.task_helper import task_helpers
 
 
-
-#These represent actual tasks waiting to be scheduled
 class Task(Base):
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True)
@@ -17,4 +17,4 @@ class Task(Base):
     time_per_replicate = Column(Float)
     min_step = Column(Integer)
     max_step = Column(Integer)
-
+    helpers = relationship("Document", secondary=task_helpers)

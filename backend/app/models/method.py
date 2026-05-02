@@ -1,12 +1,8 @@
 from app.db import Base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
 
 
 class Method(Base):
     __tablename__ = 'methods'
     id = Column(Integer, primary_key=True)
-    method_legacy_id = Column(String(255))
-    client = Column(String(255))
-    
-
-
+    document_id = Column(Integer, ForeignKey("documents.id"), nullable=False)

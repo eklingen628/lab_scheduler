@@ -11,6 +11,34 @@ load_dotenv()
 
 app = FastAPI()
 
+from app.routes import (
+    person,
+    method,
+    method_alias,
+    method_task,
+    default_task,
+    task,
+    sample_test,
+    sample_test_group,
+    scheduled_task,
+)
+
+
+app.include_router(person.router)
+app.include_router(method.router)
+app.include_router(method_alias.router)
+app.include_router(method_task.router)
+app.include_router(default_task.router)
+app.include_router(task.router)
+app.include_router(sample_test.router)
+app.include_router(sample_test_group.router)
+app.include_router(scheduled_task.router)
+
+
+
+
+
+
 origins = os.getenv("CORS_ORIGINS", "").split(",")
 
 app.add_middleware(

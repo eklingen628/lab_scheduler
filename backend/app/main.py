@@ -4,6 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
+from app import models
+
+
 load_dotenv()
 
 app = FastAPI()

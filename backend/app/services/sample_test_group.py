@@ -58,6 +58,19 @@ def get_sample_test_groups(db: Session) -> list[SampleTestGroup]:
     return db.query(SampleTestGroup).all()
 
 
+
+def get_sample_test_groups_with_tasks(db: Session) -> list[SampleTestGroup]:
+    return (
+        db.query(SampleTestGroup)
+        .options(
+            selectinload(SampleTestGroup.tasks),
+            selectinload(SampleTestGroup.sample_tests)
+        )
+        .all()
+    )
+
+
+
 def get_sample_test_group(db: Session, sample_test_group_id: int) -> SampleTestGroup | None:
     return db.get(SampleTestGroup, sample_test_group_id)
 

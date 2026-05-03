@@ -1,4 +1,6 @@
 from pydantic import BaseModel, ConfigDict
+from app.schemas.task import TaskRead
+from app.schemas.sample_test import SampleTestRead
 
 
 class SampleTestGroupBase(BaseModel):
@@ -13,6 +15,13 @@ class SampleTestGroupRead(SampleTestGroupBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SampleTestGroupWithTasksRead(SampleTestGroupBase):
+    id: int
+    tasks: list[TaskRead]
+    sample_tests: list[SampleTestRead]
+    
 
 
 class SampleTestGroupUpdate(SampleTestGroupBase):

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import get_db
-from app.schemas.sample_test_group import SampleTestGroupCreate, SampleTestGroupRead, SampleTestGroupUpdate
+from app.schemas.sample_test_group import SampleTestGroupWithTasksRead, SampleTestGroupCreate, SampleTestGroupRead, SampleTestGroupUpdate
 from app.services import sample_test_group as sample_test_group_service
 from app.exceptions import NotFoundError
 
@@ -16,6 +16,11 @@ def create(data: SampleTestGroupCreate, db: Session = Depends(get_db)):
 @router.get("", response_model=list[SampleTestGroupRead])
 def list_all(db: Session = Depends(get_db)):
     return sample_test_group_service.get_sample_test_groups(db)
+
+
+@router.get("/with-tasks", response_model=list[SampleTestGroupWithTasksRead])
+def list_all_with_tasks(db: Session = Depends(get_db)):
+    return sample_test_group_service.get_sample_test_groups_with_tasks(db)
 
 
 @router.get("/{sample_test_group_id}", response_model=SampleTestGroupRead)

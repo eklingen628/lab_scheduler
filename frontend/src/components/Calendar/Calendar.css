@@ -1,0 +1,79 @@
+.calendar-view {
+  padding: 1.5rem;
+  font-family: sans-serif;
+}
+
+.calendar-view h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.calendar-grid {
+  display: grid;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  overflow-x: auto;
+}
+
+.calendar-header-cell {
+  background: #f4f4f4;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+  padding: 6px 8px;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.calendar-person-label {
+  padding: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #333;
+  background: #fafafa;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: flex-start;
+}
+
+.calendar-cell {
+  min-height: 80px;
+  padding: 4px;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #fff;
+}
+
+.task-chip {
+  background: #4a7fcb;
+  color: #fff;
+  border-radius: 4px;
+  padding: 4px 7px;
+  font-size: 0.73rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-chip-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.task-chip-time {
+  font-size: 0.68rem;
+  opacity: 0.85;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

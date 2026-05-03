@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.expression import and_
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
@@ -27,6 +27,7 @@ def get_tasks_date_range(db: Session, start: date, end: date) -> list[Task]:
     return (
         db.query(Task)
         .filter(and_(Task.scheduled_date >= start, Task.scheduled_date <= end))
+        .options(selectinload(Task.person), selectinload(Task.sample_test_group))
         .all()
     )
 

@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict
 
 class TaskBase(BaseModel):
     sample_test_group_id: int | None = None
-    method_task_id: int | None = None
+    template_task_id: int | None = None
     type: str | None = None
     name: str | None = None
     description: str | None = None

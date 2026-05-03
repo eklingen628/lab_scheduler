@@ -1,16 +1,15 @@
 from app.db import Base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
-from app.models.method_task_helper import method_task_helpers
+from app.models.template_task_helper import template_task_helpers
 
 
-#These are the per-method templated tasks
-#User may use a default task as a template but then edits details
-# and submits to create a method task.
-class MethodTask(Base):
-    __tablename__ = "method_tasks"
+# Per-template tasks. User may prefill from a default task but edits fields
+# independently; default_task_id is stored for provenance only.
+class TemplateTask(Base):
+    __tablename__ = "template_tasks"
     id = Column(Integer, primary_key=True)
-    method_id = Column(Integer, ForeignKey("methods.id"), nullable=False)
+    template_id = Column(Integer, ForeignKey("templates.id"), nullable=False)
     default_task_id = Column(Integer, ForeignKey("default_tasks.id"), nullable=True)
     type = Column(String(255))
     name = Column(String(255))
@@ -20,4 +19,4 @@ class MethodTask(Base):
     time_per_replicate = Column(Float)
     min_step = Column(Integer)
     max_step = Column(Integer)
-    helpers = relationship("Document", secondary=method_task_helpers)
+    helpers = relationship("Document", secondary=template_task_helpers)

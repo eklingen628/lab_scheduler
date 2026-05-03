@@ -2,7 +2,7 @@ from .document import Document
 from .default_task import DefaultTask
 from .method_alias import MethodAlias
 from .method import Method
-from .method_task import MethodTask
+from .template_task import TemplateTask
 from .person import Person
 from .sample_test_group import SampleTestGroup
 from .sample_test import SampleTest

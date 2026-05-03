@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
-import type { DragStartEvent, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCenter, pointerWithin } from '@dnd-kit/core';
+import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import type { Person, Task } from './components/types';
 import CalendarView from './components/Calendar/CalendarView';
@@ -35,6 +35,14 @@ function computePositions(tasks: Task[]): Map<number, number> {
 
 const DATES = getWeekDates();
 
+const collisionDetection: CollisionDetection = (args) => {
+  // Use pointer position for the sidebar so it registers the moment the pointer
+  // enters it, regardless of drag origin. Fall back to closestCenter for the calendar.
+  const sidebarHit = pointerWithin(args).find(c => c.id === 'sidebar');
+  if (sidebarHit) return [sidebarHit];
+  return closestCenter(args);
+};
+
 export default function App() {
   const [people, setPeople] = useState<Person[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -42,6 +50,10 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  // Tracks schedule-state changes made this session so the sidebar stays in sync.
+  // true  = task was scheduled (sidebar→calendar)
+  // false = task was unscheduled (calendar→sidebar)
+  const [scheduledOverrides, setScheduledOverrides] = useState<Map<number, boolean>>(new Map());
 
   useEffect(() => {
     async function fetchData() {
@@ -80,7 +92,6 @@ export default function App() {
   }
 
   function handleDragOver(event: DragOverEvent) {
-    // Sidebar drags don't reorder; cell highlight comes from useDroppable isOver
     if (event.active.data.current?.source === 'sidebar') return;
 
     const { active, over } = event;
@@ -88,6 +99,9 @@ export default function App() {
 
     const activeId = Number(active.id);
     const overId = over.id;
+
+    // Hovering over the sidebar — don't preview any move
+    if (overId === 'sidebar') return;
 
     setTasks(prev => {
       const activeIdx = prev.findIndex(t => t.id === activeId);
@@ -144,10 +158,20 @@ export default function App() {
       if (!task || !over) return;
 
       const overId = over.id;
-      if (typeof overId !== 'string' || !overId.startsWith('cell|')) return;
+      let personId: number;
+      let date: string;
 
-      const [, personIdStr, date] = overId.split('|');
-      const personId = Number(personIdStr);
+      if (typeof overId === 'string' && overId.startsWith('cell|')) {
+        const [, personIdStr, dateStr] = overId.split('|');
+        personId = Number(personIdStr);
+        date = dateStr;
+      } else {
+        const overTask = tasks.find(t => t.id === Number(overId));
+        if (!overTask || overTask.person_id === null || overTask.scheduled_date === null) return;
+        personId = overTask.person_id;
+        date = overTask.scheduled_date;
+      }
+
       const position = tasks.filter(
         t => t.person_id === personId && t.scheduled_date === date
       ).length;
@@ -161,14 +185,29 @@ export default function App() {
             ? prev.map(t => (t.id === task.id ? updated : t))
             : [...prev, updated];
         });
+        setScheduledOverrides(prev => new Map(prev).set(task.id, true));
       } catch {
-        // server error — no state change needed since we didn't optimistically update
+        // server error — no optimistic state to revert
       }
       return;
     }
 
-    // Calendar-internal drag
+    // Calendar-internal drag (or calendar→sidebar)
     if (!before) return;
+
+    const overId = event.over?.id;
+
+    if (overId === 'sidebar') {
+      const taskId = Number(event.active.id);
+      try {
+        await patch(`/tasks/${taskId}`, { person_id: null, scheduled_date: null, position: null });
+        setTasks(before.filter(t => t.id !== taskId));
+        setScheduledOverrides(prev => new Map(prev).set(taskId, false));
+      } catch {
+        setTasks(before);
+      }
+      return;
+    }
 
     const afterPositions = computePositions(tasks);
     const beforePositions = computePositions(before);
@@ -206,15 +245,15 @@ export default function App() {
   return (
     <div className="app-layout">
       <DndContext
-        collisionDetection={closestCenter}
+        collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <Sidebar />
+        <Sidebar scheduledOverrides={scheduledOverrides} />
         <CalendarView people={people} tasks={tasks} dates={DATES} />
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {activeTask ? <TaskChip task={activeTask} isDragOverlay /> : null}
         </DragOverlay>
       </DndContext>

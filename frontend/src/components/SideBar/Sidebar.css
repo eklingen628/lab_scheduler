@@ -56,3 +56,9 @@
   gap: 4px;
   overflow: hidden;
 }
+
+.sidebar-view--over {
+  outline: 2px dashed #4a7fcb;
+  outline-offset: -3px;
+  background: #edf2fb;
+}

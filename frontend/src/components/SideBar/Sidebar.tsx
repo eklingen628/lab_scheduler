@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 import TestGroupRow from './TestGroupRow';
 import { get } from '../../api';
 import type { SampleTestGroup } from '../types';
 import './Sidebar.css';
 
-export default function Sidebar() {
+interface Props {
+  scheduledOverrides: Map<number, boolean>;
+}
+
+export default function Sidebar({ scheduledOverrides }: Props) {
   const [groupData, setGroupData] = useState<SampleTestGroup[]>([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const { setNodeRef, isOver } = useDroppable({ id: 'sidebar' });
 
   useEffect(() => {
     async function fetchData() {
@@ -27,7 +34,10 @@ export default function Sidebar() {
   if (error) return <div className="sidebar-view" style={{ padding: '1rem' }}>Failed to load groups.</div>;
 
   return (
-    <div className="sidebar-view">
+    <div
+      ref={setNodeRef}
+      className={`sidebar-view${isOver ? ' sidebar-view--over' : ''}`}
+    >
       {groupData.map(group => {
         const sampleIds = group.sample_tests
           .map(st => st.sample_id)
@@ -42,6 +52,7 @@ export default function Sidebar() {
             sampleIds={sampleIds}
             testNames={testNames}
             tasks={group.tasks}
+            scheduledOverrides={scheduledOverrides}
           />
         );
       })}

@@ -84,3 +84,10 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+.task-chip--scheduled {
+  background: #a8bfd8;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px dashed #7a9ec0;
+  box-sizing: border-box;
+}

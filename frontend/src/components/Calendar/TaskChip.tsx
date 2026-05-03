@@ -5,15 +5,16 @@ interface Props {
   task: Task;
   ghost?: boolean;
   isDragOverlay?: boolean;
+  scheduled?: boolean;
 }
 
-export default function TaskChip({ task, ghost = false, isDragOverlay = false }: Props) {
+export default function TaskChip({ task, ghost = false, isDragOverlay = false, scheduled = false }: Props) {
   return (
     <div
-      className="task-chip"
+      className={`task-chip${scheduled ? ' task-chip--scheduled' : ''}`}
       style={{
         opacity: ghost ? 0.3 : 1,
-        cursor: isDragOverlay ? 'grabbing' : 'grab',
+        cursor: scheduled ? 'default' : isDragOverlay ? 'grabbing' : 'grab',
       }}
     >
       <span className="task-chip-name">{task.name}</span>

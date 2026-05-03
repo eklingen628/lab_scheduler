@@ -1,7 +1,5 @@
 from app.db import Base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from app.models.template_task_helper import template_task_helpers
 
 
 # Per-template tasks. User may prefill from a default task but edits fields
@@ -19,4 +17,3 @@ class TemplateTask(Base):
     time_per_replicate = Column(Float)
     min_step = Column(Integer)
     max_step = Column(Integer)
-    helpers = relationship("Document", secondary=template_task_helpers)

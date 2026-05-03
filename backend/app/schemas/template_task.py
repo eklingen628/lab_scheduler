@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-from app.schemas.document import DocumentRead
 
 
 class TemplateTaskBase(BaseModel):
@@ -17,15 +16,13 @@ class TemplateTaskBase(BaseModel):
 
 class TemplateTaskCreate(TemplateTaskBase):
     template_id: int
-    helper_document_ids: list[int] = []
 
 
 class TemplateTaskRead(TemplateTaskBase):
     id: int
-    helpers: list[DocumentRead] = []
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class TemplateTaskUpdate(TemplateTaskBase):
-    helper_document_ids: list[int] | None = None
+    pass

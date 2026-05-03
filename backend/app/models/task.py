@@ -1,7 +1,5 @@
 from app.db import Base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from app.models.task_helper import task_helpers
 
 
 class Task(Base):
@@ -17,4 +15,3 @@ class Task(Base):
     time_per_replicate = Column(Float)
     min_step = Column(Integer)
     max_step = Column(Integer)
-    helpers = relationship("Document", secondary=task_helpers)

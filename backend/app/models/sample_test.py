@@ -1,13 +1,15 @@
 from app.db import Base
 from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, Text
+from sqlalchemy.orm import relationship
 
-# A test is "staged" if it has a sample_test_group_id. 
+# A test is "staged" if it has a sample_test_group_id.
 
 
 class SampleTest(Base):
     __tablename__ = 'sample_tests'
     id = Column(Integer, primary_key=True)
     group_id = Column(Integer, ForeignKey("sample_test_groups.id"))
+    sample_test_group = relationship("SampleTestGroup", back_populates="sample_tests")
     test_key = Column(Integer, unique=True, index=True, nullable=False)
     
     project = Column(String(255))

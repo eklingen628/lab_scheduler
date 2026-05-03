@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.schemas.task import TaskCreate, TaskRead, TaskUpdate
 from app.services import task as task_service
+from app.exceptions import DateRangeError
+from datetime import date
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -13,7 +15,12 @@ def create(data: TaskCreate, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=list[TaskRead])
-def list_all(db: Session = Depends(get_db)):
+def list_all(start: date | None = None, end: date | None = None, db: Session = Depends(get_db)):
+    if start is not None and end is not None:
+        try:
+            return task_service.get_tasks_date_range(db, start, end)
+        except DateRangeError as e:
+            raise HTTPException(400, str(e))
     return task_service.get_tasks(db)
 
 

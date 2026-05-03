@@ -20,7 +20,6 @@ from app.routes import (
     task,
     sample_test,
     sample_test_group,
-    scheduled_task,
     imports,
 )
 
@@ -33,7 +32,6 @@ app.include_router(default_task.router)
 app.include_router(task.router)
 app.include_router(sample_test.router)
 app.include_router(sample_test_group.router)
-app.include_router(scheduled_task.router)
 app.include_router(imports.router)
 
 

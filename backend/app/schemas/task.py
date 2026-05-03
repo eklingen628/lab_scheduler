@@ -1,3 +1,4 @@
+from datetime import date
 from pydantic import BaseModel, ConfigDict
 
 
@@ -11,6 +12,9 @@ class TaskBase(BaseModel):
     time_per_replicate: float | None = None
     min_step: int | None = None
     max_step: int | None = None
+    scheduled_date: date | None = None
+    person_id: int | None = None
+    position: int | None = None
 
 
 class TaskCreate(TaskBase):

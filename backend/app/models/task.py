@@ -1,5 +1,6 @@
 from app.db import Base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class Task(Base):
@@ -14,3 +15,8 @@ class Task(Base):
     time_per_replicate = Column(Float)
     min_step = Column(Integer)
     max_step = Column(Integer)
+    scheduled_date = Column(Date, nullable=True)
+    person_id = Column(Integer, ForeignKey("people.id"), nullable=True)
+    position = Column(Integer, nullable=True)
+    sample_test_group = relationship("SampleTestGroup", back_populates="tasks")
+    person = relationship("Person")

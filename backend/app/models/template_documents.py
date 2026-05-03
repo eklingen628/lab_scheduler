@@ -7,6 +7,6 @@ from sqlalchemy import Table, Column, Integer, ForeignKey
 template_documents = Table(
     "template_documents",
     Base.metadata,
-    Column("template_id", Integer, ForeignKey("template_tasks.id"), primary_key=True),
+    Column("template_id", Integer, ForeignKey("templates.id"), primary_key=True),
     Column("document_id", Integer, ForeignKey("documents.id"), primary_key=True),
 )

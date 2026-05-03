@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import and_
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
+from app.exceptions import DateRangeError
+from datetime import date
 
 
 def create_task(db: Session, data: TaskCreate, commit: bool = True) -> Task | None:
@@ -16,6 +19,16 @@ def create_task(db: Session, data: TaskCreate, commit: bool = True) -> Task | No
 
 def get_tasks(db: Session) -> list[Task]:
     return db.query(Task).all()
+
+
+def get_tasks_date_range(db: Session, start: date, end: date) -> list[Task]:
+    if end < start:
+        raise DateRangeError("Invalid date range, end is before start")
+    return (
+        db.query(Task)
+        .filter(and_(Task.scheduled_date >= start, Task.scheduled_date <= end))
+        .all()
+    )
 
 
 def get_task(db: Session, task_id: int) -> Task | None:

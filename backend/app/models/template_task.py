@@ -3,8 +3,8 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 
 
-# Per-template tasks. User may prefill from a default task but edits fields
-# independently; default_task_id is stored for provenance only.
+# Per-template tasks. User may prefill from a default task but edits fields independently
+
 class TemplateTask(Base):
     __tablename__ = "template_tasks"
     id = Column(Integer, primary_key=True)

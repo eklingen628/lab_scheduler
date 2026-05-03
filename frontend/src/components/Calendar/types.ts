@@ -4,6 +4,7 @@ export interface Task {
   base_time: number;
   scheduled_date: string;
   person_id: number;
+  position?: number | null;
 }
 
 export interface Person {

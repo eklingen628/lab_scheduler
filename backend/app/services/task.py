@@ -28,6 +28,7 @@ def get_tasks_date_range(db: Session, start: date, end: date) -> list[Task]:
         db.query(Task)
         .filter(and_(Task.scheduled_date >= start, Task.scheduled_date <= end))
         .options(selectinload(Task.person), selectinload(Task.sample_test_group))
+        .order_by(Task.position.nullslast())
         .all()
     )
 

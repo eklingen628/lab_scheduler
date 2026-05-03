@@ -49,6 +49,13 @@
   flex-direction: column;
   gap: 3px;
   background: #fff;
+  transition: background 0.1s;
+}
+
+.calendar-cell--over {
+  background: #e8f0fb;
+  outline: 2px dashed #4a7fcb;
+  outline-offset: -2px;
 }
 
 .task-chip {

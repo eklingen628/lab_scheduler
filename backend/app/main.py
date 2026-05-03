@@ -13,6 +13,7 @@ app = FastAPI()
 
 from app.routes import (
     person,
+    template,
     template_task,
     template_test_name_alias,
     default_task,
@@ -25,6 +26,7 @@ from app.routes import (
 
 
 app.include_router(person.router)
+app.include_router(template.router)
 app.include_router(template_task.router)
 app.include_router(template_test_name_alias.router)
 app.include_router(default_task.router)

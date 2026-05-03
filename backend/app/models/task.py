@@ -5,8 +5,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey
 class Task(Base):
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True)
-    sample_test_group_id = Column(Integer, ForeignKey("sample_test_groups.id"))
-    template_task_id = Column(Integer, ForeignKey("template_tasks.id"))
+    sample_test_group_id = Column(Integer, ForeignKey("sample_test_groups.id", ondelete="CASCADE"))
     type = Column(String(255))
     name = Column(String(255))
     description = Column(String(255))

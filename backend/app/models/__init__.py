@@ -7,3 +7,4 @@ from .sample_test_group import SampleTestGroup
 from .sample_test import SampleTest
 from .scheduled_task import ScheduledTask
 from .task import Task
+from .template import Template

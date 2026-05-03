@@ -6,7 +6,7 @@ class SampleTestGroupBase(BaseModel):
 
 
 class SampleTestGroupCreate(SampleTestGroupBase):
-    pass
+    template_ids: list[int]
 
 
 class SampleTestGroupRead(SampleTestGroupBase):

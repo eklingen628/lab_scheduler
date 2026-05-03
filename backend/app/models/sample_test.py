@@ -1,6 +1,8 @@
 from app.db import Base
 from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, Text
 
+# A test is "staged" if it has a sample_test_group_id. 
+
 
 class SampleTest(Base):
     __tablename__ = 'sample_tests'

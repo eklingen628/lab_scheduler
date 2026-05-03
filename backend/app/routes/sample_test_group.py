@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.schemas.sample_test_group import SampleTestGroupCreate, SampleTestGroupRead, SampleTestGroupUpdate
 from app.services import sample_test_group as sample_test_group_service
+from app.exceptions import NotFoundError
 
 router = APIRouter(prefix="/sample-test-groups", tags=["sample-test-groups"])
 
@@ -38,3 +39,22 @@ def delete(sample_test_group_id: int, db: Session = Depends(get_db)):
     if not sample_test_group_service.delete_sample_test_group(db, sample_test_group_id):
         raise HTTPException(404, "Sample test group not found")
     return {"deleted": True}
+
+
+@router.post("/{sample_test_group_id}/samples/{sample_test_id}")
+def add_sample(sample_test_group_id: int, sample_test_id: int, db: Session = Depends(get_db)):
+    try:
+        sample_test_group_service.add_test_to_sample_test_group(db, sample_test_group_id, sample_test_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    return {"added": True}
+
+
+@router.delete("/samples/{sample_test_id}")
+def remove_sample(sample_test_id: int, db: Session = Depends(get_db)):
+    try:
+        sample_test_group_service.remove_test_from_sample_test_group(db, sample_test_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return {"removed": True}

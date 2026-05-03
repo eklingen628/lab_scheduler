@@ -3,12 +3,15 @@ from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
 
 
-def create_task(db: Session, data: TaskCreate) -> Task:
+def create_task(db: Session, data: TaskCreate, commit: bool = True) -> Task | None:
     task = Task(**data.model_dump())
     db.add(task)
-    db.commit()
-    db.refresh(task)
-    return task
+    if commit:
+        db.commit()
+        db.refresh(task)
+        return task
+    else:
+        return None
 
 
 def get_tasks(db: Session) -> list[Task]:

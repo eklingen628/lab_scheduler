@@ -1,7 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import type { Person, Task } from './types';
-import TaskChip from './TaskChip';
+import type { Person, Task } from '../types';
+import SortableTaskChip from './SortableTaskChip';
 
 interface Props {
   person: Person;
@@ -21,7 +21,7 @@ export default function CalendarCell({ person, date, tasks }: Props) {
     >
       <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
         {tasks.map(task => (
-          <TaskChip key={task.id} task={task} />
+          <SortableTaskChip key={task.id} task={task} />
         ))}
       </SortableContext>
     </div>

@@ -1,29 +1,18 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { Task } from './types';
+import type { Task } from '../types';
 import './Calendar.css';
 
 interface Props {
   task: Task;
+  ghost?: boolean;
   isDragOverlay?: boolean;
 }
 
-export default function TaskChip({ task, isDragOverlay = false }: Props) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: task.id,
-    disabled: isDragOverlay,
-  });
-
+export default function TaskChip({ task, ghost = false, isDragOverlay = false }: Props) {
   return (
     <div
       className="task-chip"
-      ref={isDragOverlay ? undefined : setNodeRef}
-      {...(isDragOverlay ? {} : listeners)}
-      {...(isDragOverlay ? {} : attributes)}
       style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging && !isDragOverlay ? 0.3 : 1,
+        opacity: ghost ? 0.3 : 1,
         cursor: isDragOverlay ? 'grabbing' : 'grab',
       }}
     >

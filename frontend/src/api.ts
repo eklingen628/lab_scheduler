@@ -11,6 +11,7 @@ export async function get(input: string) {
         return data
     } catch (error) {
         console.error("Fetch failed:", error);
+        throw error
     }
 
 }
@@ -30,6 +31,7 @@ export async function patch(input: string, body: Record<string, unknown>) {
         return await res.json()
     } catch (error) {
         console.error("Patch failed:", error);
+        throw error
     }
 }
 

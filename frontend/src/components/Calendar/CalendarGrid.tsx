@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import type { Person, Task } from './types';
+import type { Person, Task } from '../types';
 import CalendarCell from './CalendarCell';
 
 interface Props {

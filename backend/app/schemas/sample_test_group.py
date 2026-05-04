@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.task import TaskRead
 from app.schemas.sample_test import SampleTestRead
 
@@ -8,7 +8,9 @@ class SampleTestGroupBase(BaseModel):
 
 
 class SampleTestGroupCreate(SampleTestGroupBase):
-    template_ids: list[int]
+    template_ids: list[int] = Field(min_length=1)
+    sample_test_ids: list[int]
+
 
 
 class SampleTestGroupRead(SampleTestGroupBase):

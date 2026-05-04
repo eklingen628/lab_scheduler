@@ -13,11 +13,18 @@ def create_sample_test_group(db: Session, data: SampleTestGroupCreate) -> Sample
     payload = data.model_dump()
 
     template_ids = payload.pop("template_ids")
+    sample_test_ids = payload.pop("sample_test_ids")
 
     #create the sample test group
     sample_test_group = SampleTestGroup(**payload)
     db.add(sample_test_group)
     db.flush()
+
+    sample_tests = (
+        db.query(SampleTest)
+        .filter(SampleTest.id.in_(sample_test_ids))
+        .all()
+    )
 
 
 
@@ -45,7 +52,16 @@ def create_sample_test_group(db: Session, data: SampleTestGroupCreate) -> Sample
             )
             
             create_task(db, task_create, False)
-            
+
+
+
+    #for each sample test Id, set its group_id set to the new group
+    for sample_test in sample_tests:
+        sample_test.group_id = sample_test_group.id
+        
+
+
+
     db.commit()
 
 

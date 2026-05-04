@@ -73,7 +73,7 @@ export default function CreateGroupModal({ onConfirm, onCancel }: Props) {
           <button
             className="modal-btn modal-btn--confirm"
             onClick={handleConfirm}
-            disabled={submitting}
+            disabled={submitting || selectedIds.size === 0}
           >
             {submitting ? 'Creating...' : 'Create Group'}
           </button>

@@ -4,16 +4,14 @@ interface Props {
   groups: SampleTestGroup[];
   selectedId: number | null;
   onSelect: (id: number) => void;
-  onNew: () => void;
 
 }
 
-export default function GroupList({ groups, selectedId, onSelect, onNew }: Props) {
+export default function GroupList({ groups, selectedId, onSelect }: Props) {
   return (
     <div className="staging-left">
       <div className="staging-left-header">
         <span className="staging-left-title">Groups</span>
-        <button className="staging-new-btn" onClick={onNew}>+ New</button>
 
       </div>
       <div className="group-list">

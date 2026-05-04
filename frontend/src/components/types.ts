@@ -37,6 +37,7 @@ export interface Template {
   id: number
   name: string | null
   description: string | null
+  testNamePatters: (string | null)[]
 }
 
 export interface TemplateTask {

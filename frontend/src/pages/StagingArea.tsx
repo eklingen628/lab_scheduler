@@ -5,6 +5,7 @@ import GroupList from '../components/StagingArea/GroupList';
 import GroupDetail from '../components/StagingArea/GroupDetail';
 import CreateGroupModal from '../components/StagingArea/CreateGroupModal';
 import '../components/StagingArea/StagingArea.css';
+import TestPool from '../components/StagingArea/TestPool';
 
 export default function StagingArea() {
   const [tests, setTests] = useState<SampleTest[]>([]);
@@ -13,6 +14,8 @@ export default function StagingArea() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [selectedTestsToAdd, setSelectedTestsToAdd] = useState<Set<number>>(new Set());
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -43,18 +46,54 @@ export default function StagingArea() {
   }
 
   async function handleCreateGroup(templateIds: number[]) {
-    const group = await post('/sample-test-groups', { template_ids: templateIds });
+    if (selectedTestsToAdd.size === 0) return;
+
+    const group = await post('/sample-test-groups', {
+      template_ids: templateIds,
+      sample_test_ids: [...selectedTestsToAdd],
+    });
+
     await refresh();
     setSelectedGroupId(group.id);
+    setSelectedTestsToAdd(new Set());
     setShowModal(false);
   }
 
-  async function handleAdd(testIds: number[]) {
-    await Promise.all(
-      testIds.map(id => post(`/sample-test-groups/${selectedGroupId}/samples/${id}`))
-    );
-    await refresh();
+
+
+  function toggleSelect(id: number) {
+    setSelectedTestsToAdd(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }
+
+  const resetSelection = () => setSelectedTestsToAdd(new Set());
+
+
+  // async function handleAdd(testIds: number[]) {
+
+  // }
+
+
+
+  async function handleAdd() {
+    if (selectedTestsToAdd.size === 0) return;
+    setAdding(true);
+    try {
+      await Promise.all(
+        [...selectedTestsToAdd].map(id => post(`/sample-test-groups/${selectedGroupId}/samples/${id}`))
+      );
+      await refresh();
+      setSelectedTestsToAdd(new Set());
+    } finally {
+      setAdding(false);
+    }
+  }
+
+
 
   async function handleRemove(testId: number) {
     await del(`/sample-test-groups/samples/${testId}`);
@@ -68,11 +107,23 @@ export default function StagingArea() {
 
   return (
     <div className="staging-layout">
+      <div className="staging-center">
+          <TestPool
+            group={selectedGroup}
+            allTests={tests}
+            onAdd={handleAdd}
+            onNew={() => setShowModal(true)}
+            onToggle={toggleSelect}
+            selectedTestsToAdd={selectedTestsToAdd}
+            onMount={resetSelection}
+            adding={adding}
+          />
+      </div>
       <GroupList
         groups={groups}
         selectedId={selectedGroupId}
         onSelect={setSelectedGroupId}
-        onNew={() => setShowModal(true)}
+        
 
       />
       <div className="staging-right">
@@ -80,7 +131,6 @@ export default function StagingArea() {
           <GroupDetail
             group={selectedGroup}
             allTests={tests}
-            onAdd={handleAdd}
             onRemove={handleRemove}
           />
         ) : (
@@ -89,6 +139,9 @@ export default function StagingArea() {
           </div>
         )}
       </div>
+
+
+
       {showModal && (
         <CreateGroupModal
           onConfirm={handleCreateGroup}

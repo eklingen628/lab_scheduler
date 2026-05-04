@@ -183,8 +183,19 @@
   }
 }
 
+.root-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.page-content {
+  flex: 1;
+  overflow: hidden;
+}
+
 .app-layout {
   display: flex;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 }

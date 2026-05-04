@@ -99,7 +99,7 @@ def add_test_to_sample_test_group(db: Session, sample_test_group_id: int, sample
     sample_test = db.get(SampleTest, sample_test_id)
     if sample_test is None:
         raise NotFoundError("SampleTest not found")
-    sample_test.sample_test_group_id = sample_test_group_id
+    sample_test.group_id = sample_test_group_id
     db.commit()
 
 
@@ -108,7 +108,7 @@ def remove_test_from_sample_test_group(db: Session, sample_test_id: int):
     sample_test = db.get(SampleTest, sample_test_id)
     if sample_test is None:
         raise NotFoundError("SampleTest not found")
-    sample_test.sample_test_group_id = None
+    sample_test.group_id = None
     db.commit()
 
 

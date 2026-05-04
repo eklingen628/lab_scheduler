@@ -23,7 +23,7 @@ def update_template_task(db: Session, template_task_id: int, data: TemplateTaskU
     template_task = db.get(TemplateTask, template_task_id)
     if not template_task:
         return None
-    for field, value in data.model_dump():
+    for field, value in data.model_dump(exclude_unset=True).items():
         setattr(template_task, field, value)
     db.commit()
     db.refresh(template_task)

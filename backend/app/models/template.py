@@ -9,6 +9,6 @@ class Template(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
     description = Column(String(255))
-    template_tasks = relationship("TemplateTask", back_populates="template")
-    test_name_aliases = relationship("TemplateTestNameAlias", back_populates="template")
+    template_tasks = relationship("TemplateTask", back_populates="template", cascade="all, delete-orphan")
+    test_name_aliases = relationship("TemplateTestNameAlias", back_populates="template", cascade="all, delete-orphan")
     documents = relationship("Document", secondary=template_documents)

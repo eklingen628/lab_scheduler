@@ -7,16 +7,17 @@ interface Props {
   person: Person;
   date: string;
   tasks: Task[];
+  isToday: boolean;
 }
 
-export default function CalendarCell({ person, date, tasks }: Props) {
+export default function CalendarCell({ person, date, tasks, isToday }: Props) {
   const { setNodeRef, isOver } = useDroppable({
     id: `cell|${person.id}|${date}`,
   });
 
   return (
     <div
-      className={`calendar-cell${isOver ? ' calendar-cell--over' : ''}`}
+      className={`calendar-cell${isToday ? ' calendar-cell--today' : ''}${isOver ? ' calendar-cell--over' : ''}`}
       ref={setNodeRef}
     >
       <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>

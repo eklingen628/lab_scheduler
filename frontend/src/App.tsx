@@ -3,6 +3,8 @@ import NavBar from './components/NavBar';
 import Calendar from './pages/Calendar';
 import StagingArea from './pages/StagingArea';
 import Templates from './pages/Templates';
+import TemplateNew from './pages/TemplateNew';
+import TemplateDetail from './pages/TemplateDetail';
 import './App.css';
 
 export default function App() {
@@ -15,6 +17,8 @@ export default function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/staging" element={<StagingArea />} />
           <Route path="/templates" element={<Templates />} />
+          <Route path="/templates/new" element={<TemplateNew />} />
+          <Route path="/templates/:id" element={<TemplateDetail />} />
         </Routes>
       </main>
     </div>

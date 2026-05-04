@@ -24,10 +24,38 @@ export type Task = {
 
 export interface SampleTest {
   id: number
+  test_key: number
+  group_id: number | null
   sample_id: string | null
   test_name: string | null
   project: string | null
+  due_date: string | null
   status: string | null
+}
+
+export interface Template {
+  id: number
+  name: string | null
+  description: string | null
+}
+
+export interface TemplateTask {
+  id: number
+  template_id: number
+  type: string | null
+  name: string | null
+  description: string | null
+  equipment: string | null
+  base_time: number | null
+  time_per_replicate: number | null
+  min_step: number | null
+  max_step: number | null
+}
+
+export interface TemplateTestNameAlias {
+  id: number
+  template_id: number
+  test_name_pattern: string
 }
 
 export interface SampleTestGroup {

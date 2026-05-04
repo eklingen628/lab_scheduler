@@ -14,6 +14,14 @@ function formatHeader(iso: string): string {
   return `${labels[d.getDay()]} ${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+function localToday(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+const TODAY = localToday();
+
 export default function CalendarGrid({ people, dates, tasks }: Props) {
   return (
     <div
@@ -22,7 +30,7 @@ export default function CalendarGrid({ people, dates, tasks }: Props) {
     >
       <div className="calendar-header-cell" />
       {dates.map(date => (
-        <div key={date} className="calendar-header-cell">
+        <div key={date} className={`calendar-header-cell${date === TODAY ? ' calendar-header-cell--today' : ''}`}>
           {formatHeader(date)}
         </div>
       ))}
@@ -37,6 +45,7 @@ export default function CalendarGrid({ people, dates, tasks }: Props) {
               key={`${person.id}-${date}`}
               person={person}
               date={date}
+              isToday={date === TODAY}
               tasks={tasks.filter(t => t.person_id === person.id && t.scheduled_date === date)}
             />
           ))}

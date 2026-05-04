@@ -8,15 +8,20 @@ import TaskChip from '../components/Calendar/TaskChip';
 import Sidebar from '../components/SideBar/Sidebar';
 import { get, patch } from '../api';
 
-function getWeekDates(): string[] {
+function localDateStr(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function getWeekDates(offset = 0): string[] {
   const today = new Date();
   const day = today.getDay();
   const monday = new Date(today);
-  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1) + offset * 7);
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    return d.toISOString().slice(0, 10);
+    return localDateStr(d);
   });
 }
 
@@ -32,8 +37,6 @@ function computePositions(tasks: Task[]): Map<number, number> {
   return result;
 }
 
-const DATES = getWeekDates();
-
 const collisionDetection: CollisionDetection = (args) => {
   const sidebarHit = pointerWithin(args).find(c => c.id === 'sidebar');
   if (sidebarHit) return [sidebarHit];
@@ -41,6 +44,8 @@ const collisionDetection: CollisionDetection = (args) => {
 };
 
 export default function Calendar() {
+  const [weekOffset, setWeekOffset] = useState(0);
+  const dates = getWeekDates(weekOffset);
   const [people, setPeople] = useState<Person[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksBeforeDrag, setTasksBeforeDrag] = useState<Task[] | null>(null);
@@ -50,11 +55,14 @@ export default function Calendar() {
   const [scheduledOverrides, setScheduledOverrides] = useState<Map<number, boolean>>(new Map());
 
   useEffect(() => {
+    setLoading(true);
+    setError(false);
+    setScheduledOverrides(new Map());
     async function fetchData() {
       try {
         const [peopleData, tasksData] = await Promise.all([
           get('/people'),
-          get(`/tasks?start=${DATES[0]}&end=${DATES[6]}`),
+          get(`/tasks?start=${dates[0]}&end=${dates[6]}`),
         ]);
         setPeople(peopleData);
         setTasks(tasksData);
@@ -65,7 +73,7 @@ export default function Calendar() {
       }
     }
     fetchData();
-  }, []);
+  }, [weekOffset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleDragStart(event: DragStartEvent) {
     const source = event.active.data.current?.source;
@@ -231,9 +239,6 @@ export default function Calendar() {
     }
   }
 
-  if (loading) return <div className="app-layout" style={{ padding: '2rem' }}>Loading...</div>;
-  if (error) return <div className="app-layout" style={{ padding: '2rem' }}>Failed to load data.</div>;
-
   return (
     <div className="app-layout">
       <DndContext
@@ -244,7 +249,17 @@ export default function Calendar() {
         onDragCancel={handleDragCancel}
       >
         <Sidebar scheduledOverrides={scheduledOverrides} />
-        <CalendarView people={people} tasks={tasks} dates={DATES} />
+        <CalendarView
+          people={people}
+          tasks={tasks}
+          dates={dates}
+          loading={loading}
+          error={error}
+          isCurrentWeek={weekOffset === 0}
+          onPrev={() => setWeekOffset(o => o - 1)}
+          onNext={() => setWeekOffset(o => o + 1)}
+          onToday={() => setWeekOffset(0)}
+        />
         <DragOverlay dropAnimation={null}>
           {activeTask ? <TaskChip task={activeTask} isDragOverlay /> : null}
         </DragOverlay>

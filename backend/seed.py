@@ -81,7 +81,7 @@ tasks_data = {
 }
 
 for group_name, tasks in tasks_data.items():
-    group = post("/sample-test-groups", {"template_ids": []})
+    group = post("/sample-test-groups", {"template_ids": [1], "sample_test_ids": []})
     print(f"Created sample test group id={group['id']}\n")
 
     for t in tasks:

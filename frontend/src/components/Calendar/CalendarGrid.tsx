@@ -6,6 +6,10 @@ interface Props {
   people: Person[];
   dates: string[];
   tasks: Task[];
+  selectedPersonId: number | null;
+  selectedDate: string | null;
+  setPerson: (value: React.SetStateAction<Person | null>) => void;
+  setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
 
 function formatHeader(iso: string): string {
@@ -22,7 +26,7 @@ function localToday(): string {
 
 const TODAY = localToday();
 
-export default function CalendarGrid({ people, dates, tasks }: Props) {
+export default function CalendarGrid({ people, dates, tasks, selectedPersonId, selectedDate, setPerson, setCurrentDate }: Props) {
   return (
     <div
       className="calendar-grid"
@@ -46,7 +50,10 @@ export default function CalendarGrid({ people, dates, tasks }: Props) {
               person={person}
               date={date}
               isToday={date === TODAY}
+              isSelected={person.id === selectedPersonId && date === selectedDate}
               tasks={tasks.filter(t => t.person_id === person.id && t.scheduled_date === date)}
+              setPerson={setPerson}
+              setCurrentDate={setCurrentDate}
             />
           ))}
         </Fragment>

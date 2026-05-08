@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { DndContext, DragOverlay, closestCenter, pointerWithin } from '@dnd-kit/core';
-import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection } from '@dnd-kit/core';
+import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection, Modifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import type { Person, Task } from '../components/types';
 import CalendarView from '../components/Calendar/CalendarView';
 import TaskChip from '../components/Calendar/TaskChip';
+import DayViewTask from '../components/Calendar/DayViewTask';
 import Sidebar from '../components/SideBar/Sidebar';
 import { get, patch } from '../api';
+import DayView from '@/components/Calendar/DayView';
 
 function localDateStr(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -37,7 +39,23 @@ function computePositions(tasks: Task[]): Map<number, number> {
   return result;
 }
 
+const dayviewVerticalOnly: Modifier = ({ transform, active }) => {
+  if (active?.data?.current?.source === 'dayview') {
+    return { ...transform, x: 0 };
+  }
+  return transform;
+};
+
 const collisionDetection: CollisionDetection = (args) => {
+  if (args.active?.data?.current?.source === 'dayview') {
+    const filtered = {
+      ...args,
+      droppableContainers: args.droppableContainers.filter(
+        c => typeof c.id !== 'string' || (!c.id.startsWith('cell|') && c.id !== 'sidebar')
+      ),
+    };
+    return closestCenter(filtered);
+  }
   const sidebarHit = pointerWithin(args).find(c => c.id === 'sidebar');
   if (sidebarHit) return [sidebarHit];
   return closestCenter(args);
@@ -52,7 +70,11 @@ export default function Calendar() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeSource, setActiveSource] = useState<string | null>(null);
   const [scheduledOverrides, setScheduledOverrides] = useState<Map<number, boolean>>(new Map());
+
+  const [currentDate, setCurrentDate] = useState<string | null>(null)
+  const [person, setPerson] = useState<Person | null>(null)
 
   useEffect(() => {
     setLoading(true);
@@ -77,8 +99,11 @@ export default function Calendar() {
 
   function handleDragStart(event: DragStartEvent) {
     const source = event.active.data.current?.source;
+    setActiveSource(source ?? null);
     if (source === 'sidebar') {
       setActiveTask(event.active.data.current?.task as Task);
+    } else if (source === 'dayview') {
+      setActiveTask(tasks.find(t => t.id === event.active.data.current?.taskId) ?? null);
     } else {
       setActiveTask(tasks.find(t => t.id === Number(event.active.id)) ?? null);
     }
@@ -87,6 +112,7 @@ export default function Calendar() {
 
   function handleDragCancel() {
     setActiveTask(null);
+    setActiveSource(null);
     if (tasksBeforeDrag) {
       setTasks(tasksBeforeDrag);
       setTasksBeforeDrag(null);
@@ -94,7 +120,8 @@ export default function Calendar() {
   }
 
   function handleDragOver(event: DragOverEvent) {
-    if (event.active.data.current?.source === 'sidebar') return;
+    const source = event.active.data.current?.source;
+    if (source === 'sidebar') return;
 
     const { active, over } = event;
     if (!over) return;
@@ -103,6 +130,24 @@ export default function Calendar() {
     const overId = over.id;
 
     if (overId === 'sidebar') return;
+
+    if (source === 'dayview') {
+      if (typeof overId === 'string' && overId.startsWith('cell|')) return;
+      const realActiveId = event.active.data.current?.taskId as number;
+      const realOverId = typeof overId === 'string' && overId.startsWith('dayview-task-')
+        ? parseInt(overId.replace('dayview-task-', ''), 10)
+        : Number(overId);
+      setTasks(prev => {
+        const activeIdx = prev.findIndex(t => t.id === realActiveId);
+        const overIdx = prev.findIndex(t => t.id === realOverId);
+        if (activeIdx === -1 || overIdx === -1 || activeIdx === overIdx) return prev;
+        const a = prev[activeIdx];
+        const o = prev[overIdx];
+        if (a.person_id !== o.person_id || a.scheduled_date !== o.scheduled_date) return prev;
+        return arrayMove(prev, activeIdx, overIdx);
+      });
+      return;
+    }
 
     setTasks(prev => {
       const activeIdx = prev.findIndex(t => t.id === activeId);
@@ -148,6 +193,7 @@ export default function Calendar() {
 
   async function handleDragEnd(event: DragEndEvent) {
     setActiveTask(null);
+    setActiveSource(null);
     const before = tasksBeforeDrag;
     setTasksBeforeDrag(null);
 
@@ -243,6 +289,8 @@ export default function Calendar() {
     <div className="app-layout">
       <DndContext
         collisionDetection={collisionDetection}
+        modifiers={[dayviewVerticalOnly]}
+        autoScroll={activeSource !== 'dayview'}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
@@ -256,12 +304,27 @@ export default function Calendar() {
           loading={loading}
           error={error}
           isCurrentWeek={weekOffset === 0}
+          selectedPersonId={person?.id ?? null}
+          selectedDate={currentDate}
           onPrev={() => setWeekOffset(o => o - 1)}
           onNext={() => setWeekOffset(o => o + 1)}
           onToday={() => setWeekOffset(0)}
+          setPerson={setPerson}
+          setCurrentDate={setCurrentDate}
+        /> 
+        <DayView
+          person={person}
+          date={currentDate}
+          tasks={tasks}
+          setPerson={setPerson}
+          setCurrentDate={setCurrentDate}
         />
         <DragOverlay dropAnimation={null}>
-          {activeTask ? <TaskChip task={activeTask} isDragOverlay /> : null}
+          {activeTask
+            ? activeSource === 'dayview'
+              ? <DayViewTask task={activeTask} isDragOverlay />
+              : <TaskChip task={activeTask} isDragOverlay />
+            : null}
         </DragOverlay>
       </DndContext>
     </div>

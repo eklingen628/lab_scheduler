@@ -81,7 +81,7 @@
 
 .calendar-cell {
   min-height: 120px;
-  padding: 4px;
+  padding: 4px 4px 40px;
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
   display: flex;
@@ -94,6 +94,12 @@
 .calendar-cell--over {
   background: #e8f0fb;
   outline: 2px dashed #4a7fcb;
+  outline-offset: -2px;
+}
+
+.calendar-cell--selected {
+  background: #ddeaf9;
+  outline: 2px solid #4a7fcb;
   outline-offset: -2px;
 }
 
@@ -129,4 +135,91 @@
   color: rgba(255, 255, 255, 0.7);
   border: 1px dashed #7a9ec0;
   box-sizing: border-box;
+}
+
+.day-view-panel {
+  width: 25%;
+  flex-shrink: 0;
+  min-height: 100%;
+}
+
+.day-view-empty {
+  font-size: 0.82rem;
+  color: #999;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.day-view-task {
+  background: #4a7fcb;
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.day-view-task-grip {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.day-view-task-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.day-view-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-view-task-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.day-view-task-type {
+  font-size: 0.72rem;
+  opacity: 0.85;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
+  padding: 1px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.day-view-task-description {
+  font-size: 0.78rem;
+  opacity: 0.85;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.day-view-task-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.day-view-task-field {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.day-view-task-label {
+  opacity: 0.7;
 }

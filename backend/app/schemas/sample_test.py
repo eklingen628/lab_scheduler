@@ -21,7 +21,7 @@ class SampleTestBase(BaseModel):
     peer_reviewer: str | None = None
     qa_submitted: bool | None = None
     interval: str | None = None
-    method_list: str | None = None
+    method: str | None = None
     number_of: int | None = None
     status: str | None = None
     gl_assign: str | None = None
@@ -69,11 +69,11 @@ class SampleTestUpdate(SampleTestBase):
     peer_reviewer: str | None = None
     qa_submitted: bool | None = None
     interval: str | None = None
-    method_legacy_ids: str | None = None
+    method: str | None = None
     number_of: int | None = None
     status: str | None = None
     gl_assign: str | None = None
-    pl_assgin: str | None = None
+    pl_assign: str | None = None
     client: str | None = None
     spec_sheet: str | None = None
     temp: str | None = None

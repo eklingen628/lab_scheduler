@@ -3,10 +3,10 @@ import pandas as pd
 from sqlalchemy.orm import Session
 from app.models.sample_test import SampleTest
 
-CSV_COLUMN_MAP = {"method": "method_list"}
+CSV_COLUMN_MAP = {}
 
 CSV_MANAGED_FIELDS = [
-    "method_list", "test_key", "project", "sample_id", "subassign", "test_name",
+    "method", "test_key", "project", "sample_id", "subassign", "test_name",
     "due_date", "pull_date", "init_date", "actual_start_date", "available_date",
     "product_group", "employee", "need_pr", "pr_comp", "peer_reviewer",
     "qa_submitted", "interval", "number_of", "status", "gl_assign", "pl_assign",

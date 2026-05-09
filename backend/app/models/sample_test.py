@@ -28,7 +28,7 @@ class SampleTest(Base):
     peer_reviewer = Column(String(255))
     qa_submitted = Column(Boolean)
     interval = Column(String(255))
-    method_list = Column(String(255))
+    method = Column(String(255))
     number_of = Column(Integer)
     status = Column(String(255))
     gl_assign = Column(String(255))

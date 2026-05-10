@@ -8,6 +8,7 @@ interface Props {
   tasks: Task[];
   selectedPersonId: number | null;
   selectedDate: string | null;
+  onEditTask: (task: Task) => void;
   setPerson: (value: React.SetStateAction<Person | null>) => void;
   setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
@@ -26,7 +27,7 @@ function localToday(): string {
 
 const TODAY = localToday();
 
-export default function CalendarGrid({ people, dates, tasks, selectedPersonId, selectedDate, setPerson, setCurrentDate }: Props) {
+export default function CalendarGrid({ people, dates, tasks, selectedPersonId, selectedDate, onEditTask, setPerson, setCurrentDate }: Props) {
   return (
     <div
       className="calendar-grid"
@@ -52,6 +53,7 @@ export default function CalendarGrid({ people, dates, tasks, selectedPersonId, s
               isToday={date === TODAY}
               isSelected={person.id === selectedPersonId && date === selectedDate}
               tasks={tasks.filter(t => t.person_id === person.id && t.scheduled_date === date)}
+              onEditTask={onEditTask}
               setPerson={setPerson}
               setCurrentDate={setCurrentDate}
             />

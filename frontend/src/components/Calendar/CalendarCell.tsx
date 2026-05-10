@@ -17,11 +17,12 @@ interface Props {
   tasks: Task[];
   isToday: boolean;
   isSelected: boolean;
+  onEditTask: (task: Task) => void;
   setPerson: (value: React.SetStateAction<Person | null>) => void;
   setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
 
-export default function CalendarCell({ person, date, tasks, isToday, isSelected, setCurrentDate, setPerson }: Props) {
+export default function CalendarCell({ person, date, tasks, isToday, isSelected, onEditTask, setCurrentDate, setPerson }: Props) {
   const { setNodeRef, isOver } = useDroppable({
     id: `cell|${person.id}|${date}`,
   });
@@ -36,7 +37,13 @@ export default function CalendarCell({ person, date, tasks, isToday, isSelected,
       onDoubleClick={() => {setCurrentDate(date); setPerson(person);}}
     >
       <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-        {tasks.map(task => <SortableTaskChip key={task.id} task={task} />)}
+        {tasks.map(task => (
+          <SortableTaskChip
+            key={task.id}
+            task={task}
+            onEdit={() => onEditTask(task)}
+          />
+        ))}
       </SortableContext>
     </div>
   </ContextMenuTrigger>

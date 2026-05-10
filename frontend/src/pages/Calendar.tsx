@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { DndContext, DragOverlay, closestCenter, pointerWithin } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection, Modifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import type { Person, Task } from '../components/types';
+import type { Person, Task, SampleTest, SampleTestGroup } from '../components/types';
 import CalendarView from '../components/Calendar/CalendarView';
 import TaskChip from '../components/Calendar/TaskChip';
 import DayViewTask from '../components/Calendar/DayViewTask';
 import Sidebar from '../components/SideBar/Sidebar';
 import { get, patch } from '../api';
 import DayView from '@/components/Calendar/DayView';
+import TaskEditModal from '@/components/Calendar/TaskEditModal';
 
 function localDateStr(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -71,10 +72,25 @@ export default function Calendar() {
   const [error, setError] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [activeSource, setActiveSource] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [scheduledOverrides, setScheduledOverrides] = useState<Map<number, boolean>>(new Map());
 
   const [currentDate, setCurrentDate] = useState<string | null>(null)
   const [person, setPerson] = useState<Person | null>(null)
+  const [sampleTestsByGroup, setSampleTestsByGroup] = useState<Map<number, SampleTest[]>>(new Map())
+
+  useEffect(() => {
+    async function fetchGroups() {
+      try {
+        const groups: SampleTestGroup[] = await get('/sample-test-groups/with-tasks');
+        setSampleTestsByGroup(new Map(groups.map(g => [g.id, g.sample_tests])));
+      } catch {
+        // non-fatal — task cards just won't show sample table
+      }
+    }
+    fetchGroups();
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -285,6 +301,35 @@ export default function Calendar() {
     }
   }
 
+  function openEditModal(task: Task) {
+    setEditingTask(task);
+    setModalOpen(true);
+  }
+
+  function openCreateModal() {
+    setEditingTask(null);
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setModalOpen(false);
+    setEditingTask(null);
+  }
+
+  function handleSavedTask(saved: Task) {
+    setTasks(prev => {
+      const idx = prev.findIndex(t => t.id === saved.id);
+      return idx !== -1 ? prev.map(t => t.id === saved.id ? saved : t) : [...prev, saved];
+    });
+    closeModal();
+  }
+
+  function handleUnscheduledTask(taskId: number) {
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    setScheduledOverrides(prev => new Map(prev).set(taskId, false));
+    closeModal();
+  }
+
   return (
     <div className="app-layout">
       <DndContext
@@ -306,16 +351,20 @@ export default function Calendar() {
           isCurrentWeek={weekOffset === 0}
           selectedPersonId={person?.id ?? null}
           selectedDate={currentDate}
+          onEditTask={openEditModal}
           onPrev={() => setWeekOffset(o => o - 1)}
           onNext={() => setWeekOffset(o => o + 1)}
           onToday={() => setWeekOffset(0)}
           setPerson={setPerson}
           setCurrentDate={setCurrentDate}
-        /> 
+        />
         <DayView
           person={person}
           date={currentDate}
           tasks={tasks}
+          sampleTestsByGroup={sampleTestsByGroup}
+          onEditTask={openEditModal}
+          onAddTask={openCreateModal}
           setPerson={setPerson}
           setCurrentDate={setCurrentDate}
         />
@@ -327,6 +376,16 @@ export default function Calendar() {
             : null}
         </DragOverlay>
       </DndContext>
+      <TaskEditModal
+        task={editingTask}
+        open={modalOpen}
+        people={people}
+        initialPersonId={person?.id ?? null}
+        initialDate={currentDate}
+        onClose={closeModal}
+        onSaved={handleSavedTask}
+        onUnscheduled={handleUnscheduledTask}
+      />
     </div>
   );
 }

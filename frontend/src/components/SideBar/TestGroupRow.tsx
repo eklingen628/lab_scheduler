@@ -1,21 +1,35 @@
 import TestGroupBubble from './TestGroupBubble';
 import DraggableTaskChip from '../Calendar/DraggableTaskChip';
 import TaskChip from '../Calendar/TaskChip';
-import type { Task } from '../types';
+import type { SampleTest, Task } from '../types';
 import './Sidebar.css';
 
 interface Props {
   groupId: number;
-  sampleIds: string[];
+  sampleTests: SampleTest[];
   testNames: string[];
+  projects: string[];
+  clients: string[];
+  specSheets: string[];
+  otherDocs: string[];
+  methods: string[];
   tasks: Task[];
   scheduledOverrides: Map<number, boolean>;
 }
 
-export default function TestGroupRow({ groupId, sampleIds, testNames, tasks, scheduledOverrides }: Props) {
+export default function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, specSheets, otherDocs, methods, tasks, scheduledOverrides }: Props) {
   return (
     <div className="sidebar-row">
-      <TestGroupBubble groupId={groupId} sampleIds={sampleIds} testNames={testNames} />
+      <TestGroupBubble
+        groupId={groupId}
+        sampleTests={sampleTests}
+        testNames={testNames}
+        projects={projects}
+        clients={clients}
+        specSheets={specSheets}
+        otherDocs={otherDocs}
+        methods={methods}
+      />
       <div className="sidebar-tasks">
         {tasks.map(task => {
           const override = scheduledOverrides.get(task.id);

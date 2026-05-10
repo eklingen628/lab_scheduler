@@ -1,5 +1,5 @@
 .sidebar-view {
-  width: 420px;
+  width: 560px;
   flex-shrink: 0;
   border-right: 1px solid #d0d0d0;
   background: #f7f8fa;
@@ -14,6 +14,7 @@
   align-items: stretch;
   border-bottom: 1px solid #e0e0e0;
   min-height: 60px;
+  flex-shrink: 0;
 }
 
 .sidebar-row:nth-child(odd) {
@@ -25,16 +26,34 @@
 }
 
 .sidebar-bubble {
-  flex: 0 0 180px;
-  padding: 8px 10px;
+  flex: 0 0 300px;
+  padding: 10px 12px;
   border-right: 1px solid #d0d0d0;
   background: #4a7fcb;
   color: #fff;
   font-size: 0.73rem;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   cursor: default;
+}
+
+.sidebar-bubble-row {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.sidebar-bubble-label {
+  font-weight: 600;
+  opacity: 0.75;
+  white-space: nowrap;
+  min-width: 44px;
+}
+
+.sidebar-bubble-label::after {
+  content: ':';
 }
 
 .sidebar-bubble p {
@@ -46,6 +65,65 @@
   font-weight: 700;
   font-size: 0.76rem;
   margin-bottom: 2px;
+}
+
+.sidebar-bubble-projects {
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.sidebar-bubble-popover {
+  position: fixed;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  padding: 8px 12px;
+  width: max-content;
+  max-width: 420px;
+  font-family: sans-serif;
+  pointer-events: auto;
+}
+
+.sidebar-popover-table {
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  color: #222;
+  width: 100%;
+}
+
+.sidebar-popover-table th {
+  text-align: left;
+  font-weight: 600;
+  color: #888;
+  padding: 0 10px 5px 0;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.sidebar-popover-table th:last-child,
+.sidebar-popover-table td:last-child {
+  padding-right: 0;
+}
+
+.sidebar-popover-table td {
+  padding: 4px 10px 4px 0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.sidebar-popover-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-popover-pr-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: #4a7fcb;
+  color: #fff;
+  border-radius: 3px;
+  padding: 1px 5px;
 }
 
 .sidebar-tasks {

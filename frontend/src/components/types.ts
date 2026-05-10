@@ -31,6 +31,12 @@ export interface SampleTest {
   project: string | null
   due_date: string | null
   status: string | null
+  client: string | null
+  spec_sheet: string | null
+  other_testing_documents: string | null
+  pr_comp: boolean | null
+  number_of: number | null
+  method: string | null
 }
 
 export interface Template {

@@ -1,20 +1,25 @@
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.expression import and_
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskUpdate
+from app.schemas.task import TaskCreate, TaskUpdate, TaskCreateFromScratch
 from app.exceptions import DateRangeError
+from app.services.sample_test_group import create_sample_test_group_empty
 from datetime import date
 
 
-def create_task(db: Session, data: TaskCreate, commit: bool = True) -> Task | None:
+def create_task_from_group(db: Session, data: TaskCreate) -> Task | None:
     task = Task(**data.model_dump())
     db.add(task)
-    if commit:
-        db.commit()
-        db.refresh(task)
-        return task
-    else:
-        return None
+    return None
+
+
+
+def create_task_from_scratch(db: Session, data: TaskCreateFromScratch) -> Task | None:
+    sample_test_group = create_sample_test_group_empty(db)
+    task = Task(**data.model_dump(), sample_test_group_id=sample_test_group.id)
+    db.add(task)
+    db.commit()
+    return task
 
 
 def get_tasks(db: Session) -> list[Task]:

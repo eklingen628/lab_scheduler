@@ -3,6 +3,7 @@ import DraggableTaskChip from '../Calendar/DraggableTaskChip';
 import TaskChip from '../Calendar/TaskChip';
 import type { SampleTest, Task } from '../types';
 import './Sidebar.css';
+import { memo } from 'react';
 
 interface Props {
   groupId: number;
@@ -17,7 +18,8 @@ interface Props {
   scheduledOverrides: Map<number, boolean>;
 }
 
-export default function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, specSheets, otherDocs, methods, tasks, scheduledOverrides }: Props) {
+
+function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, specSheets, otherDocs, methods, tasks, scheduledOverrides }: Props) {
   return (
     <div className="sidebar-row">
       <TestGroupBubble
@@ -44,3 +46,6 @@ export default function TestGroupRow({ groupId, sampleTests, testNames, projects
     </div>
   );
 }
+
+
+export default memo(TestGroupRow)

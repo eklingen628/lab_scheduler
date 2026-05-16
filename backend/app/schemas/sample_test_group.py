@@ -12,6 +12,10 @@ class SampleTestGroupCreate(SampleTestGroupBase):
     sample_test_ids: list[int]
 
 
+class SampleTestGroupCreateEmpty(SampleTestGroupBase):
+    pass
+
+
 
 class SampleTestGroupRead(SampleTestGroupBase):
     id: int

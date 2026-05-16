@@ -43,9 +43,9 @@ export default function StagingArea() {
     setGroups(groupsData);
   }
 
-  async function handleCreateGroup(templateIds: number[]) {
+  async function handleCreateGroupWithTests(templateIds: number[]) {
     if (selectedTestsToAdd.size === 0) return;
-    const group = await post('/sample-test-groups', {
+    await post('/sample-test-groups', {
       template_ids: templateIds,
       sample_test_ids: [...selectedTestsToAdd],
     });
@@ -119,7 +119,7 @@ export default function StagingArea() {
 
       {showModal && (
         <CreateGroupModal
-          onConfirm={handleCreateGroup}
+          onConfirm={handleCreateGroupWithTests}
           onCancel={() => setShowModal(false)}
         />
       )}

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import get_db
-from app.schemas.task import TaskCreate, TaskRead, TaskUpdate
+from app.schemas.task import TaskCreateFromScratch, TaskRead, TaskUpdate
 from app.services import task as task_service
 from app.exceptions import DateRangeError
 from datetime import date
@@ -10,8 +10,8 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 @router.post("", response_model=TaskRead)
-def create(data: TaskCreate, db: Session = Depends(get_db)):
-    return task_service.create_task(db, data)
+def create(data: TaskCreateFromScratch, db: Session = Depends(get_db)):
+    return task_service.create_task_from_scratch(db, data)
 
 
 @router.get("", response_model=list[TaskRead])

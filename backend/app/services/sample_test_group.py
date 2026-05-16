@@ -2,9 +2,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.models.sample_test_group import SampleTestGroup
 from app.schemas.sample_test_group import SampleTestGroupCreate, SampleTestGroupUpdate
 from app.models.template import Template
-from app.services.task import create_task
-from app.schemas.task import TaskCreate
-from app.schemas.sample_test import SampleTestUpdate
+from app.models.task import Task
 from app.models.sample_test import SampleTest
 from app.exceptions import NotFoundError
 
@@ -26,8 +24,6 @@ def create_sample_test_group(db: Session, data: SampleTestGroupCreate) -> Sample
         .all()
     )
 
-
-
     templates = (
         db.query(Template)
         .filter(Template.id.in_(template_ids))
@@ -35,11 +31,10 @@ def create_sample_test_group(db: Session, data: SampleTestGroupCreate) -> Sample
         .all()
     )
 
-
     #for each template Id, create a Task row with copied fields and test_group_id set to the new group
     for template in templates:
         for template_task in template.template_tasks:
-            task_create = TaskCreate(
+            task = Task(
                 sample_test_group_id=sample_test_group.id,
                 type= template_task.type,
                 name=template_task.name,
@@ -51,23 +46,25 @@ def create_sample_test_group(db: Session, data: SampleTestGroupCreate) -> Sample
                 max_step=template_task.max_step,
             )
             
-            create_task(db, task_create, False)
-
-
+            db.add(task)
 
     #for each sample test Id, set its group_id set to the new group
     for sample_test in sample_tests:
         sample_test.group_id = sample_test_group.id
         
-
-
-
     db.commit()
 
-
-
-
     return sample_test_group
+
+
+
+def create_sample_test_group_empty(db: Session):
+    sample_test_group = SampleTestGroup()
+    db.add(sample_test_group)
+    db.flush()
+    return sample_test_group
+
+
 
 
 def get_sample_test_groups(db: Session) -> list[SampleTestGroup]:

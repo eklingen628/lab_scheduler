@@ -75,20 +75,27 @@ export default function Calendar() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [scheduledOverrides, setScheduledOverrides] = useState<Map<number, boolean>>(new Map());
+  const [groupData, setGroupData] = useState<SampleTestGroup[] | null>(null)
+  const [groupDataError, setGroupDataError] = useState(false);
 
   const [currentDate, setCurrentDate] = useState<string | null>(null)
   const [person, setPerson] = useState<Person | null>(null)
   const [sampleTestsByGroup, setSampleTestsByGroup] = useState<Map<number, SampleTest[]>>(new Map())
 
-  useEffect(() => {
-    async function fetchGroups() {
-      try {
-        const groups: SampleTestGroup[] = await get('/sample-test-groups/with-tasks');
-        setSampleTestsByGroup(new Map(groups.map(g => [g.id, g.sample_tests])));
-      } catch {
-        // non-fatal — task cards just won't show sample table
-      }
+
+  async function fetchGroups() {
+    try {
+      const groups: SampleTestGroup[] = await get('/sample-test-groups/with-tasks');
+      setSampleTestsByGroup(new Map(groups.map(g => [g.id, g.sample_tests])));
+      setGroupData(groups);
+
+    } catch {
+      setGroupDataError(true)
     }
+  }
+
+
+  useEffect(() => {
     fetchGroups();
   }, []);
 
@@ -186,6 +193,11 @@ export default function Calendar() {
 
       const crossCell =
         activeTask.person_id !== overPersonId || activeTask.scheduled_date !== overDate;
+
+      if (!crossCell && typeof overId === 'string' && overId.startsWith('cell|')) {
+        return prev;
+      }
+      
 
       let next = crossCell
         ? prev.map(t =>
@@ -321,6 +333,7 @@ export default function Calendar() {
       const idx = prev.findIndex(t => t.id === saved.id);
       return idx !== -1 ? prev.map(t => t.id === saved.id ? saved : t) : [...prev, saved];
     });
+    fetchGroups();
     closeModal();
   }
 
@@ -341,7 +354,8 @@ export default function Calendar() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <Sidebar scheduledOverrides={scheduledOverrides} />
+
+        <Sidebar scheduledOverrides={scheduledOverrides} groupData={groupData} groupDataError={groupDataError} />
         <CalendarView
           people={people}
           tasks={tasks}

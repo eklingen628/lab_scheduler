@@ -3,7 +3,6 @@ from pydantic import BaseModel, ConfigDict
 
 
 class TaskBase(BaseModel):
-    sample_test_group_id: int | None = None
     type: str | None = None
     name: str | None = None
     description: str | None = None
@@ -18,14 +17,19 @@ class TaskBase(BaseModel):
 
 
 class TaskCreate(TaskBase):
+    sample_test_group_id: int | None = None
+
+
+class TaskCreateFromScratch(TaskBase):
     pass
 
 
 class TaskRead(TaskBase):
+    sample_test_group_id: int | None = None
     id: int
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class TaskUpdate(TaskBase):
-    pass
+    sample_test_group_id: int | None = None

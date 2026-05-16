@@ -89,6 +89,8 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState<string | null>(null)
   const [person, setPerson] = useState<Person | null>(null)
   const [sampleTestsByGroup, setSampleTestsByGroup] = useState<Map<number, SampleTest[]>>(new Map())
+  const [personFilter, setPersonFilter] = useState<Set<number> | null>(null)
+  const [personSort, setPersonSort] = useState<'asc' | 'desc' | null>(null)
 
   
 
@@ -394,7 +396,7 @@ export default function Calendar() {
 
 
   return (
-    <CalendarContext.Provider value={{ setPerson, setCurrentDate, onEditTask: openEditModal, people, goToPersonDate }}>
+    <CalendarContext.Provider value={{ setPerson, setCurrentDate, onEditTask: openEditModal, people, goToPersonDate, personFilter, setPersonFilter, personSort, setPersonSort }}>
 
     
       <div className="app-layout">

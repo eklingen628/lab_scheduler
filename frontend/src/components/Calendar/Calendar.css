@@ -50,19 +50,138 @@
 
 .calendar-grid {
   display: grid;
-  border-top: 1px solid #ddd;
   border-left: 1px solid #ddd;
 }
 
 .calendar-header-cell {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   background: #f4f4f4;
   font-size: 0.78rem;
   font-weight: 600;
   color: #555;
   padding: 6px 8px;
   border-right: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 1px 0 #ddd;
   text-align: center;
+}
+
+.calendar-header-cell--person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-filter-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.calendar-filter-btn:hover {
+  background: #e4e4e4;
+  color: #444;
+}
+
+.calendar-filter-popover {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  min-width: 180px;
+}
+
+.calendar-filter-section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999;
+  margin: 0;
+}
+
+.calendar-filter-sort-row {
+  display: flex;
+  gap: 6px;
+}
+
+.calendar-filter-sort-btn {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  color: #444;
+}
+
+.calendar-filter-sort-btn:hover {
+  background: #f4f4f4;
+}
+
+.calendar-filter-sort-btn--active {
+  background: #ddeaf9;
+  border-color: #4a7fcb;
+  color: #2a5fa8;
+}
+
+.calendar-filter-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.calendar-filter-item label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: #333;
+  cursor: pointer;
+  padding: 3px 4px;
+  border-radius: 3px;
+}
+
+.calendar-filter-item label:hover {
+  background: #f4f4f4;
+}
+
+.calendar-filter-item--all label {
+  font-weight: 600;
+  color: #555;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
+}
+
+.calendar-filter-apply-btn {
+  margin-top: 4px;
+  padding: 5px 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #4a7fcb;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.calendar-filter-apply-btn:hover {
+  background: #3a6bb5;
 }
 
 .calendar-header-cell--weekend {

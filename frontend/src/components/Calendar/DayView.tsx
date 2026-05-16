@@ -58,7 +58,7 @@ export default function DayView({ person, date, tasks, sampleTestsByGroup, onEdi
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="day-view-content">
         {active ? (
           <SortableContext items={personDateTasks.map(t => `dayview-task-${t.id}`)} strategy={verticalListSortingStrategy}>
             {personDateTasks.map(task => (

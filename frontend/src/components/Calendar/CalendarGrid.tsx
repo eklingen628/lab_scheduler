@@ -5,10 +5,9 @@ import CalendarCell from './CalendarCell';
 interface Props {
   people: Person[];
   dates: string[];
-  tasks: Task[];
+  taskMap: Record<number, Record<string, Task[]>>
   selectedPersonId: number | null;
   selectedDate: string | null;
-  onEditTask: (task: Task) => void;
   setPerson: (value: React.SetStateAction<Person | null>) => void;
   setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
@@ -27,7 +26,7 @@ function localToday(): string {
 
 const TODAY = localToday();
 
-export default function CalendarGrid({ people, dates, tasks, selectedPersonId, selectedDate, onEditTask, setPerson, setCurrentDate }: Props) {
+export default function CalendarGrid({ people, dates, taskMap, selectedPersonId, selectedDate, setPerson, setCurrentDate }: Props) {
   return (
     <div
       className="calendar-grid"
@@ -52,8 +51,7 @@ export default function CalendarGrid({ people, dates, tasks, selectedPersonId, s
               date={date}
               isToday={date === TODAY}
               isSelected={person.id === selectedPersonId && date === selectedDate}
-              tasks={tasks.filter(t => t.person_id === person.id && t.scheduled_date === date)}
-              onEditTask={onEditTask}
+              cellTasks={taskMap[person.id]?.[date] ?? []}
               setPerson={setPerson}
               setCurrentDate={setCurrentDate}
             />

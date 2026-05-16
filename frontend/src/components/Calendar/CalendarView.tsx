@@ -5,14 +5,13 @@ import './Calendar.css';
 
 interface Props {
   people: Person[];
-  tasks: Task[];
+  taskMap: Record<number, Record<string, Task[]>>
   dates: string[];
   loading: boolean;
   error: boolean;
   isCurrentWeek: boolean;
   selectedPersonId: number | null;
   selectedDate: string | null;
-  onEditTask: (task: Task) => void;
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
@@ -20,7 +19,7 @@ interface Props {
   setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
 
-export default function CalendarView({ people, tasks, dates, loading, error, isCurrentWeek, selectedPersonId, selectedDate, onEditTask, onPrev, onNext, onToday, setPerson, setCurrentDate }: Props) {
+export default function CalendarView({ people, taskMap, dates, loading, error, isCurrentWeek, selectedPersonId, selectedDate, onPrev, onNext, onToday, setPerson, setCurrentDate }: Props) {
   const [showLoading, setShowLoading] = useState(false);
 
   useEffect(() => {
@@ -42,7 +41,17 @@ export default function CalendarView({ people, tasks, dates, loading, error, isC
       </div>
       {showLoading && <div style={{ padding: '1rem', color: '#888' }}>Loading...</div>}
       {error && <div style={{ padding: '1rem', color: '#c00' }}>Failed to load data.</div>}
-      {!loading && !error && <CalendarGrid people={people} dates={dates} tasks={tasks} selectedPersonId={selectedPersonId} selectedDate={selectedDate} onEditTask={onEditTask} setPerson={setPerson} setCurrentDate={setCurrentDate} />}
+      {!loading && !error && 
+        <CalendarGrid 
+          people={people} 
+          dates={dates} 
+          taskMap={taskMap} 
+          selectedPersonId={selectedPersonId} 
+          selectedDate={selectedDate} 
+          setPerson={setPerson} 
+          setCurrentDate={setCurrentDate} 
+        />
+      }
     </div>
   );
 }

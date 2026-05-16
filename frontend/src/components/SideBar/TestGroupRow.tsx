@@ -1,9 +1,12 @@
+import { useContext } from 'react';
 import TestGroupBubble from './TestGroupBubble';
 import DraggableTaskChip from '../Calendar/DraggableTaskChip';
 import TaskChip from '../Calendar/TaskChip';
 import type { SampleTest, Task } from '../types';
 import './Sidebar.css';
 import { memo } from 'react';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { CalendarContext } from '../Calendar/CalendarContext';
 
 interface Props {
   groupId: number;
@@ -20,6 +23,8 @@ interface Props {
 
 
 function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, specSheets, otherDocs, methods, tasks, scheduledOverrides }: Props) {
+  const { onEditTask, goToPersonDate } = useContext(CalendarContext);
+
   return (
     <div className="sidebar-row">
       <TestGroupBubble
@@ -39,7 +44,21 @@ function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, spec
             ? override
             : task.scheduled_date !== null;
           return isScheduled
-            ? <TaskChip key={task.id} task={task} scheduled />
+            ? (
+              <ContextMenu key={task.id}>
+                <ContextMenuTrigger asChild>
+                  <div>
+                    <TaskChip task={task} scheduled />
+                  </div>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuItem onClick={() => onEditTask(task)}>Edit</ContextMenuItem>
+                  {task.person_id && task.scheduled_date && (
+                    <ContextMenuItem onClick={() => goToPersonDate(task.person_id!, task.scheduled_date!)}>Go To Current</ContextMenuItem>
+                  )}
+                </ContextMenuContent>
+              </ContextMenu>
+            )
             : <DraggableTaskChip key={task.id} task={task} />;
         })}
       </div>

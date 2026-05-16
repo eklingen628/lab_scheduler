@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useContext } from 'react';
 import { DndContext, DragOverlay, closestCenter, pointerWithin } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection, Modifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -10,20 +10,28 @@ import Sidebar from '../components/SideBar/Sidebar';
 import { get, patch } from '../api';
 import DayView from '@/components/Calendar/DayView';
 import TaskEditModal from '@/components/Calendar/TaskEditModal';
+import { CalendarContext } from '@/components/Calendar/CalendarContext';
+
+
 
 function localDateStr(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function getWeekDates(offset = 0): string[] {
-  const today = new Date();
-  const day = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1) + offset * 7);
+function getMonday(d: Date): Date {
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return monday
+}
+
+function getWeekDates(monday: Date, offset = 0): string[] {
+  const start = new Date(monday)
+  start.setDate(start.getDate() + offset * 7);
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
     return localDateStr(d);
   });
 }
@@ -64,7 +72,7 @@ const collisionDetection: CollisionDetection = (args) => {
 
 export default function Calendar() {
   const [weekOffset, setWeekOffset] = useState(0);
-  const dates = getWeekDates(weekOffset);
+  const dates = getWeekDates(getMonday(new Date()), weekOffset);
   const [people, setPeople] = useState<Person[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksBeforeDrag, setTasksBeforeDrag] = useState<Task[] | null>(null);
@@ -81,6 +89,8 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState<string | null>(null)
   const [person, setPerson] = useState<Person | null>(null)
   const [sampleTestsByGroup, setSampleTestsByGroup] = useState<Map<number, SampleTest[]>>(new Map())
+
+  
 
 
   async function fetchGroups() {
@@ -119,6 +129,22 @@ export default function Calendar() {
     }
     fetchData();
   }, [weekOffset]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const taskMap = useMemo(
+    () => {
+      const map: Record<number, Record<string, Task[]>> = {}
+      tasks.forEach(task => {
+        if (task.person_id && task.scheduled_date) {
+          if (!(task.person_id in map)) 
+            map[task.person_id] = {};
+          if (!(task.scheduled_date in map[task.person_id]))
+            map[task.person_id][task.scheduled_date] = []
+          map[task.person_id][task.scheduled_date].push(task)
+        }
+
+      })
+      return map;
+    }, [tasks])
 
   function handleDragStart(event: DragStartEvent) {
     const source = event.active.data.current?.source;
@@ -343,63 +369,86 @@ export default function Calendar() {
     closeModal();
   }
 
-  return (
-    <div className="app-layout">
-      <DndContext
-        collisionDetection={collisionDetection}
-        modifiers={[dayviewVerticalOnly]}
-        autoScroll={activeSource !== 'dayview'}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
 
-        <Sidebar scheduledOverrides={scheduledOverrides} groupData={groupData} groupDataError={groupDataError} />
-        <CalendarView
+  function goToPersonDate(person_id: number, date: string) {
+    const person = people.find(p => p.id === person_id);
+    if (!person) return;
+
+    const toMonday = getMonday(new Date(date + 'T00:00:00'));
+    const currMonday = getMonday(new Date());
+    const delta = (toMonday.getTime() - currMonday.getTime()) / 86400000;
+    const offset = Math.round(delta / 7);
+    
+    setWeekOffset(offset);
+    setPerson(person);
+    setCurrentDate(date);
+  }
+
+
+
+
+
+
+  return (
+    <CalendarContext.Provider value={{ setPerson, setCurrentDate, onEditTask: openEditModal, people, goToPersonDate }}>
+
+    
+      <div className="app-layout">
+        <DndContext
+          collisionDetection={collisionDetection}
+          modifiers={[dayviewVerticalOnly]}
+          autoScroll={activeSource !== 'dayview'}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+
+          <Sidebar scheduledOverrides={scheduledOverrides} groupData={groupData} groupDataError={groupDataError} />
+          <CalendarView
+            people={people}
+            taskMap={taskMap}
+            dates={dates}
+            loading={loading}
+            error={error}
+            isCurrentWeek={weekOffset === 0}
+            selectedPersonId={person?.id ?? null}
+            selectedDate={currentDate}
+            onPrev={() => setWeekOffset(o => o - 1)}
+            onNext={() => setWeekOffset(o => o + 1)}
+            onToday={() => setWeekOffset(0)}
+            setPerson={setPerson}
+            setCurrentDate={setCurrentDate}
+          />
+          <DayView
+            person={person}
+            date={currentDate}
+            tasks={tasks}
+            sampleTestsByGroup={sampleTestsByGroup}
+            onEditTask={openEditModal}
+            onAddTask={openCreateModal}
+            setPerson={setPerson}
+            setCurrentDate={setCurrentDate}
+          />
+          <DragOverlay dropAnimation={null}>
+            {activeTask
+              ? activeSource === 'dayview'
+                ? <DayViewTask task={activeTask} isDragOverlay />
+                : <TaskChip task={activeTask} isDragOverlay />
+              : null}
+          </DragOverlay>
+        </DndContext>
+        <TaskEditModal
+          task={editingTask}
+          open={modalOpen}
           people={people}
-          tasks={tasks}
-          dates={dates}
-          loading={loading}
-          error={error}
-          isCurrentWeek={weekOffset === 0}
-          selectedPersonId={person?.id ?? null}
-          selectedDate={currentDate}
-          onEditTask={openEditModal}
-          onPrev={() => setWeekOffset(o => o - 1)}
-          onNext={() => setWeekOffset(o => o + 1)}
-          onToday={() => setWeekOffset(0)}
-          setPerson={setPerson}
-          setCurrentDate={setCurrentDate}
+          initialPersonId={person?.id ?? null}
+          initialDate={currentDate}
+          onClose={closeModal}
+          onSaved={handleSavedTask}
+          onUnscheduled={handleUnscheduledTask}
         />
-        <DayView
-          person={person}
-          date={currentDate}
-          tasks={tasks}
-          sampleTestsByGroup={sampleTestsByGroup}
-          onEditTask={openEditModal}
-          onAddTask={openCreateModal}
-          setPerson={setPerson}
-          setCurrentDate={setCurrentDate}
-        />
-        <DragOverlay dropAnimation={null}>
-          {activeTask
-            ? activeSource === 'dayview'
-              ? <DayViewTask task={activeTask} isDragOverlay />
-              : <TaskChip task={activeTask} isDragOverlay />
-            : null}
-        </DragOverlay>
-      </DndContext>
-      <TaskEditModal
-        task={editingTask}
-        open={modalOpen}
-        people={people}
-        initialPersonId={person?.id ?? null}
-        initialDate={currentDate}
-        onClose={closeModal}
-        onSaved={handleSavedTask}
-        onUnscheduled={handleUnscheduledTask}
-      />
-    </div>
+      </div>
+    </CalendarContext.Provider>
   );
 }

@@ -14,15 +14,24 @@ export default function StagingGroups({ groups }: Props) {
         <p className="staging-empty" style={{ padding: '12px' }}>No groups yet.</p>
       ) : (
         groups.map(group => {
-          const sampleIds = group.sample_tests
-            .map(st => st.sample_id)
-            .filter((id): id is string => id !== null);
-          const testNames = group.sample_tests
-            .map(st => st.test_name)
-            .filter((name): name is string => name !== null);
+          const testNames = [...new Set(group.sample_tests.map(st => st.test_name).filter((n): n is string => n !== null))];
+          const projects = [...new Set(group.sample_tests.map(st => st.project).filter((p): p is string => p !== null))];
+          const clients = [...new Set(group.sample_tests.map(st => st.client).filter((c): c is string => c !== null))];
+          const specSheets = [...new Set(group.sample_tests.map(st => st.spec_sheet).filter((s): s is string => s !== null))];
+          const otherDocs = [...new Set(group.sample_tests.map(st => st.other_testing_documents).filter((d): d is string => d !== null))];
+          const methods = [...new Set(group.sample_tests.map(st => st.method).filter((m): m is string => m !== null))];
           return (
             <div key={group.id} className="staging-group-row">
-              <TestGroupBubble groupId={group.id} sampleIds={sampleIds} testNames={testNames} />
+              <TestGroupBubble
+                groupId={group.id}
+                sampleTests={group.sample_tests}
+                testNames={testNames}
+                projects={projects}
+                clients={clients}
+                specSheets={specSheets}
+                otherDocs={otherDocs}
+                methods={methods}
+              />
               <div className="staging-group-tasks">
                 {group.tasks.map(task => (
                   <TaskChip key={task.id} task={task} />

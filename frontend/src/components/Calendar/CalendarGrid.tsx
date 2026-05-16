@@ -18,6 +18,11 @@ function formatHeader(iso: string): string {
   return `${labels[d.getDay()]} ${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+function isWeekend(iso: string): boolean {
+  const day = new Date(iso + 'T00:00:00').getDay();
+  return day === 0 || day === 6;
+}
+
 function localToday(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -34,7 +39,7 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
     >
       <div className="calendar-header-cell" />
       {dates.map(date => (
-        <div key={date} className={`calendar-header-cell${date === TODAY ? ' calendar-header-cell--today' : ''}`}>
+        <div key={date} className={`calendar-header-cell${date === TODAY ? ' calendar-header-cell--today' : ''}${isWeekend(date) ? ' calendar-header-cell--weekend' : ''}`}>
           {formatHeader(date)}
         </div>
       ))}
@@ -51,6 +56,7 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
               date={date}
               isToday={date === TODAY}
               isSelected={person.id === selectedPersonId && date === selectedDate}
+              isWeekend={isWeekend(date)}
               cellTasks={taskMap[person.id]?.[date] ?? []}
               setPerson={setPerson}
               setCurrentDate={setCurrentDate}

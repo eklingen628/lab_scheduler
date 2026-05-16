@@ -41,16 +41,18 @@ export default function CalendarView({ people, taskMap, dates, loading, error, i
       </div>
       {showLoading && <div style={{ padding: '1rem', color: '#888' }}>Loading...</div>}
       {error && <div style={{ padding: '1rem', color: '#c00' }}>Failed to load data.</div>}
-      {!loading && !error && 
-        <CalendarGrid 
-          people={people} 
-          dates={dates} 
-          taskMap={taskMap} 
-          selectedPersonId={selectedPersonId} 
-          selectedDate={selectedDate} 
-          setPerson={setPerson} 
-          setCurrentDate={setCurrentDate} 
-        />
+      {!loading && !error &&
+        <div className="calendar-grid-wrapper">
+          <CalendarGrid
+            people={people}
+            dates={dates}
+            taskMap={taskMap}
+            selectedPersonId={selectedPersonId}
+            selectedDate={selectedDate}
+            setPerson={setPerson}
+            setCurrentDate={setCurrentDate}
+          />
+        </div>
       }
     </div>
   );

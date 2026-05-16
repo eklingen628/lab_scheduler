@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useContext } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { DndContext, DragOverlay, closestCenter, pointerWithin } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection, Modifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -287,6 +287,7 @@ export default function Calendar() {
             : [...prev, updated];
         });
         setScheduledOverrides(prev => new Map(prev).set(task.id, true));
+        fetchGroups();
       } catch {
         // server error — no optimistic state to revert
       }
@@ -303,6 +304,7 @@ export default function Calendar() {
         await patch(`/tasks/${taskId}`, { person_id: null, scheduled_date: null, position: null });
         setTasks(before.filter(t => t.id !== taskId));
         setScheduledOverrides(prev => new Map(prev).set(taskId, false));
+        fetchGroups();
       } catch {
         setTasks(before);
       }
@@ -336,6 +338,8 @@ export default function Calendar() {
 
     if (results.some(r => !r)) {
       setTasks(before);
+    } else {
+      fetchGroups();
     }
   }
 

@@ -32,23 +32,6 @@ function getGroupStatus(group: SampleTestGroup): FilterStatus {
   return 'none';
 }
 
-function applySorts(tests: SampleTest[], sorts: Sort[]): SampleTest[] {
-  if (sorts.length === 0) return tests;
-  return [...tests].sort((a, b) => {
-    for (const { field, dir } of sorts) {
-      const av = a[field];
-      const bv = b[field];
-      if (av === null && bv === null) continue;
-      if (av === null) return dir === 'asc' ? 1 : -1;
-      if (bv === null) return dir === 'asc' ? -1 : 1;
-      const cmp = typeof av === 'number' && typeof bv === 'number'
-        ? av - bv
-        : String(av).localeCompare(String(bv));
-      if (cmp !== 0) return dir === 'asc' ? cmp : -cmp;
-    }
-    return 0;
-  });
-}
 
 export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd, onRemove, onDelete, onUnschedule, adding }: Props) {
   const [activeFilters, setActiveFilters] = useState<Set<FilterStatus>>(new Set());

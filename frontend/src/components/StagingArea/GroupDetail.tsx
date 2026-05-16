@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import type { SampleTest, SampleTestGroup } from '../types';
 
 interface Props {

@@ -38,6 +38,7 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
   const { personFilter, setPersonFilter, personSort, setPersonSort } = useContext(CalendarContext)
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [draft, setDraft] = useState<Set<number> | null>(null)
+  const [draftSort, setDraftSort] = useState<'asc' | 'desc' | null>(null)
 
   const visiblePeople = useMemo(() => {
     let result = personFilter
@@ -50,11 +51,19 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
 
   function openPopover() {
     setDraft(personFilter ? new Set(personFilter) : null);
+    setDraftSort(personSort);
     setPopoverOpen(true);
   }
 
   function applyFilter() {
     setPersonFilter(draft);
+    setPersonSort(draftSort);
+    setPopoverOpen(false);
+  }
+
+  function resetFilter() {
+    setPersonFilter(null);
+    setPersonSort(null);
     setPopoverOpen(false);
   }
 
@@ -75,7 +84,10 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
         <span>Person</span>
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
-            <button className="calendar-filter-btn" onClick={openPopover}>
+            <button
+              className={`calendar-filter-btn${personFilter !== null || personSort !== null ? ' calendar-filter-btn--active' : ''}`}
+              onClick={openPopover}
+            >
               <ListFilter size={13} />
             </button>
           </PopoverTrigger>
@@ -83,12 +95,12 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
             <p className="calendar-filter-section-label">Sort</p>
             <div className="calendar-filter-sort-row">
               <button
-                className={`calendar-filter-sort-btn${personSort === 'asc' ? ' calendar-filter-sort-btn--active' : ''}`}
-                onClick={() => setPersonSort(s => s === 'asc' ? null : 'asc')}
+                className={`calendar-filter-sort-btn${draftSort === 'asc' ? ' calendar-filter-sort-btn--active' : ''}`}
+                onClick={() => setDraftSort(s => s === 'asc' ? null : 'asc')}
               >A → Z</button>
               <button
-                className={`calendar-filter-sort-btn${personSort === 'desc' ? ' calendar-filter-sort-btn--active' : ''}`}
-                onClick={() => setPersonSort(s => s === 'desc' ? null : 'desc')}
+                className={`calendar-filter-sort-btn${draftSort === 'desc' ? ' calendar-filter-sort-btn--active' : ''}`}
+                onClick={() => setDraftSort(s => s === 'desc' ? null : 'desc')}
               >Z → A</button>
             </div>
 
@@ -120,7 +132,10 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
                 ))
               }
             </ul>
-            <button className="calendar-filter-apply-btn" onClick={applyFilter}>Apply</button>
+            <div className="calendar-filter-action-row">
+              <button className="calendar-filter-reset-btn" onClick={resetFilter}>Reset</button>
+              <button className="calendar-filter-apply-btn" onClick={applyFilter}>Apply</button>
+            </div>
           </PopoverContent>
         </Popover>
       </div>

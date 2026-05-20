@@ -2,7 +2,8 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import type { Person, Task } from '../types';
 import SortableTaskChip from './SortableTaskChip';
-import { memo } from 'react';
+import { memo, useContext } from 'react';
+import { CalendarContext } from './CalendarContext';
 
 interface Props {
   person: Person;
@@ -11,11 +12,13 @@ interface Props {
   isToday: boolean;
   isSelected: boolean;
   isWeekend: boolean;
-  setPerson: (value: React.SetStateAction<Person | null>) => void;
-  setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
 
-function CalendarCell({ person, date, cellTasks, isToday, isSelected, isWeekend, setCurrentDate, setPerson }: Props) {
+function CalendarCell({ person, date, cellTasks, isToday, isSelected, isWeekend }: Props) {
+  const { setDayViewPerson, setDayViewDate } = useContext(CalendarContext)
+
+
+
   const { setNodeRef, isOver } = useDroppable({
     id: `cell|${person.id}|${date}`,
   });
@@ -24,7 +27,7 @@ function CalendarCell({ person, date, cellTasks, isToday, isSelected, isWeekend,
     <div
       className={`calendar-cell${isWeekend ? ' calendar-cell--weekend' : ''}${isToday ? ' calendar-cell--today' : ''}${isSelected ? ' calendar-cell--selected' : ''}${isOver ? ' calendar-cell--over' : ''}`}
       ref={setNodeRef}
-      onDoubleClick={() => { setCurrentDate(date); setPerson(person); }}
+      onDoubleClick={() => { setDayViewDate(date); setDayViewPerson(person); }}
     >
       <SortableContext items={cellTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
         {cellTasks.map(task => (

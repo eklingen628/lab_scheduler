@@ -1,20 +1,17 @@
+import { useContext } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { X } from 'lucide-react';
-import type { Person, Task, SampleTest } from '../types';
+import type { Task, SampleTest } from '../types';
 import SortableDayViewTask from './SortableDayViewTask';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { CalendarContext } from './CalendarContext';
 
 interface Props {
-  person: Person | null;
-  date: string | null;
-  tasks: Task[];
   sampleTestsByGroup: Map<number, SampleTest[]>;
   onEditTask: (task: Task) => void;
   onAddTask: () => void;
-  setPerson: (value: React.SetStateAction<Person | null>) => void;
-  setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
 
 function formatDate(iso: string): string {
@@ -22,16 +19,17 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
-export default function DayView({ person, date, tasks, sampleTestsByGroup, onEditTask, onAddTask, setPerson, setCurrentDate }: Props) {
-  const active = person !== null && date !== null;
+export default function DayView({ sampleTestsByGroup, onEditTask, onAddTask }: Props) {
+  const { dayViewPerson, dayViewDate, tasks, setDayViewPerson, setDayViewDate } = useContext(CalendarContext);
+  const active = dayViewPerson !== null && dayViewDate !== null;
 
   const { setNodeRef } = useDroppable({
-    id: active ? `dayview|${person.id}|${date}` : 'dayview|empty',
+    id: active ? `dayview|${dayViewPerson.id}|${dayViewDate}` : 'dayview|empty',
     disabled: !active,
   });
 
   const personDateTasks = active
-    ? tasks.filter(task => task.person_id === person.id && task.scheduled_date === date)
+    ? tasks.filter(task => task.person_id === dayViewPerson.id && task.scheduled_date === dayViewDate)
     : [];
 
   return (
@@ -41,8 +39,8 @@ export default function DayView({ person, date, tasks, sampleTestsByGroup, onEdi
           <div className="day-view-header-text">
             {active ? (
               <>
-                <span className="day-view-person">{person.first_name} {person.last_name}</span>
-                <span className="day-view-date">{formatDate(date)}</span>
+                <span className="day-view-person">{dayViewPerson.first_name} {dayViewPerson.last_name}</span>
+                <span className="day-view-date">{formatDate(dayViewDate)}</span>
               </>
             ) : (
               <span className="day-view-person">Day View</span>
@@ -51,7 +49,7 @@ export default function DayView({ person, date, tasks, sampleTestsByGroup, onEdi
           <div className="day-view-header-actions">
             <Button variant="outline" size="sm" onClick={onAddTask}>+ Add Task</Button>
             {active && (
-              <Button variant="ghost" size="icon-sm" onClick={() => { setCurrentDate(null); setPerson(null); }}>
+              <Button variant="ghost" size="icon-sm" onClick={() => { setDayViewDate(null); setDayViewPerson(null); }}>
                 <X />
               </Button>
             )}

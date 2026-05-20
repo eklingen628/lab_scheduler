@@ -15,7 +15,9 @@ export default function SortableTaskChip({ task }: Props) {
     id: task.id,
     data: { source: 'calendar' },
   });
-  const { onEditTask } = useContext(CalendarContext);
+  const { onEditTask, selectedGroupId } = useContext(CalendarContext);
+  const dimmed = selectedGroupId !== null && task.sample_test_group_id !== selectedGroupId;
+  const highlighted = selectedGroupId !== null && task.sample_test_group_id === selectedGroupId;
 
   return (
     <ContextMenu>
@@ -26,7 +28,7 @@ export default function SortableTaskChip({ task }: Props) {
           {...attributes}
           style={{ transform: CSS.Transform.toString(transform), transition }}
         >
-          <TaskChip task={task} ghost={isDragging} />
+          <TaskChip task={task} ghost={isDragging} dimmed={dimmed} highlighted={highlighted} />
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>

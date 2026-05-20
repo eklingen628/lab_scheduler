@@ -15,7 +15,9 @@ export default function DraggableTaskChip({ task }: Props) {
     id: `sidebar-${task.id}`,
     data: { source: 'sidebar', task },
   });
-  const { onEditTask } = useContext(CalendarContext);
+  const { onEditTask, selectedGroupId } = useContext(CalendarContext);
+  const dimmed = selectedGroupId !== null && task.sample_test_group_id !== selectedGroupId;
+  const highlighted = selectedGroupId !== null && task.sample_test_group_id === selectedGroupId;
 
   return (
     <ContextMenu>
@@ -26,7 +28,7 @@ export default function DraggableTaskChip({ task }: Props) {
           {...attributes}
           style={{ transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.3 : 1 }}
         >
-          <TaskChip task={task} />
+          <TaskChip task={task} dimmed={dimmed} highlighted={highlighted} />
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>

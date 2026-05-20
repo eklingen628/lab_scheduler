@@ -1,25 +1,19 @@
-import { useEffect, useState } from 'react';
-import type { Person, Task } from '../types';
+import { useContext, useEffect, useState } from 'react';
 import CalendarGrid from './CalendarGrid';
+import { CalendarContext } from './CalendarContext';
 import './Calendar.css';
 
 interface Props {
-  people: Person[];
-  taskMap: Record<number, Record<string, Task[]>>
-  dates: string[];
   loading: boolean;
   error: boolean;
   isCurrentWeek: boolean;
-  selectedPersonId: number | null;
-  selectedDate: string | null;
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
-  setPerson: (value: React.SetStateAction<Person | null>) => void;
-  setCurrentDate: (value: React.SetStateAction<string | null>) => void;
 }
 
-export default function CalendarView({ people, taskMap, dates, loading, error, isCurrentWeek, selectedPersonId, selectedDate, onPrev, onNext, onToday, setPerson, setCurrentDate }: Props) {
+export default function CalendarView({ loading, error, isCurrentWeek, onPrev, onNext, onToday }: Props) {
+  const { dates } = useContext(CalendarContext);
   const [showLoading, setShowLoading] = useState(false);
 
   useEffect(() => {
@@ -43,15 +37,7 @@ export default function CalendarView({ people, taskMap, dates, loading, error, i
       {error && <div style={{ padding: '1rem', color: '#c00' }}>Failed to load data.</div>}
       {!loading && !error &&
         <div className="calendar-grid-wrapper">
-          <CalendarGrid
-            people={people}
-            dates={dates}
-            taskMap={taskMap}
-            selectedPersonId={selectedPersonId}
-            selectedDate={selectedDate}
-            setPerson={setPerson}
-            setCurrentDate={setCurrentDate}
-          />
+          <CalendarGrid />
         </div>
       }
     </div>

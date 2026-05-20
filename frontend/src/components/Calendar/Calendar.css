@@ -296,6 +296,15 @@
   box-sizing: border-box;
 }
 
+.task-chip--dimmed {
+  opacity: 0.2;
+}
+
+.task-chip--highlighted {
+  outline: 2px solid #e53935;
+  outline-offset: 1px;
+}
+
 .day-view-panel {
   width: 420px;
   flex-shrink: 0;

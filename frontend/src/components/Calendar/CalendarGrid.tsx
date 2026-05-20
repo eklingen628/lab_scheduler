@@ -1,19 +1,9 @@
 import { Fragment, useContext, useMemo, useState } from 'react';
-import type { Person, Task } from '../types';
 import CalendarCell from './CalendarCell';
 import { ListFilter } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarContext } from './CalendarContext';
 
-interface Props {
-  people: Person[];
-  dates: string[];
-  taskMap: Record<number, Record<string, Task[]>>
-  selectedPersonId: number | null;
-  selectedDate: string | null;
-  setPerson: (value: React.SetStateAction<Person | null>) => void;
-  setCurrentDate: (value: React.SetStateAction<string | null>) => void;
-}
 
 function formatHeader(iso: string): string {
   const d = new Date(iso + 'T00:00:00');
@@ -34,8 +24,9 @@ function localToday(): string {
 
 const TODAY = localToday();
 
-export default function CalendarGrid({ people, dates, taskMap, selectedPersonId, selectedDate, setPerson, setCurrentDate }: Props) {
-  const { personFilter, setPersonFilter, personSort, setPersonSort } = useContext(CalendarContext)
+export default function CalendarGrid() {
+  const { people, dates, taskMap, dayViewPerson, personFilter, setPersonFilter, personSort, setPersonSort, dayViewDate } = useContext(CalendarContext)
+  const selectedPersonId = dayViewPerson?.id ?? null
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [draft, setDraft] = useState<Set<number> | null>(null)
   const [draftSort, setDraftSort] = useState<'asc' | 'desc' | null>(null)
@@ -157,11 +148,9 @@ export default function CalendarGrid({ people, dates, taskMap, selectedPersonId,
               person={person}
               date={date}
               isToday={date === TODAY}
-              isSelected={person.id === selectedPersonId && date === selectedDate}
+              isSelected={person.id === selectedPersonId && date === dayViewDate}
               isWeekend={isWeekend(date)}
               cellTasks={taskMap[person.id]?.[date] ?? []}
-              setPerson={setPerson}
-              setCurrentDate={setCurrentDate}
             />
           ))}
         </Fragment>

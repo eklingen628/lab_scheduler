@@ -86,11 +86,12 @@ export default function Calendar() {
   const [groupData, setGroupData] = useState<SampleTestGroup[] | null>(null)
   const [groupDataError, setGroupDataError] = useState(false);
 
-  const [currentDate, setCurrentDate] = useState<string | null>(null)
-  const [person, setPerson] = useState<Person | null>(null)
+  const [dayViewDate, setDayViewDate] = useState<string | null>(null)
+  const [dayViewPerson, setDayViewPerson] = useState<Person | null>(null)
   const [sampleTestsByGroup, setSampleTestsByGroup] = useState<Map<number, SampleTest[]>>(new Map())
   const [personFilter, setPersonFilter] = useState<Set<number> | null>(null)
   const [personSort, setPersonSort] = useState<'asc' | 'desc' | null>(null)
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
 
   
 
@@ -386,17 +387,33 @@ export default function Calendar() {
     const offset = Math.round(delta / 7);
     
     setWeekOffset(offset);
-    setPerson(person);
-    setCurrentDate(date);
+    setDayViewPerson(person);
+    setDayViewDate(date);
   }
 
 
 
 
 
-
   return (
-    <CalendarContext.Provider value={{ setPerson, setCurrentDate, onEditTask: openEditModal, people, goToPersonDate, personFilter, setPersonFilter, personSort, setPersonSort }}>
+    <CalendarContext.Provider value={{
+      setDayViewPerson,
+      setDayViewDate,
+      onEditTask: openEditModal,
+      people,
+      goToPersonDate,
+      personFilter,
+      setPersonFilter,
+      personSort,
+      setPersonSort,
+      selectedGroupId,
+      setSelectedGroupId,
+      tasks,
+      taskMap,
+      dates,
+      dayViewPerson,
+      dayViewDate,
+    }}>
 
     
       <div className="app-layout">
@@ -412,29 +429,17 @@ export default function Calendar() {
 
           <Sidebar scheduledOverrides={scheduledOverrides} groupData={groupData} groupDataError={groupDataError} />
           <CalendarView
-            people={people}
-            taskMap={taskMap}
-            dates={dates}
             loading={loading}
             error={error}
             isCurrentWeek={weekOffset === 0}
-            selectedPersonId={person?.id ?? null}
-            selectedDate={currentDate}
             onPrev={() => setWeekOffset(o => o - 1)}
             onNext={() => setWeekOffset(o => o + 1)}
             onToday={() => setWeekOffset(0)}
-            setPerson={setPerson}
-            setCurrentDate={setCurrentDate}
           />
           <DayView
-            person={person}
-            date={currentDate}
-            tasks={tasks}
             sampleTestsByGroup={sampleTestsByGroup}
             onEditTask={openEditModal}
             onAddTask={openCreateModal}
-            setPerson={setPerson}
-            setCurrentDate={setCurrentDate}
           />
           <DragOverlay dropAnimation={null}>
             {activeTask
@@ -448,8 +453,8 @@ export default function Calendar() {
           task={editingTask}
           open={modalOpen}
           people={people}
-          initialPersonId={person?.id ?? null}
-          initialDate={currentDate}
+          initialPersonId={dayViewPerson?.id ?? null}
+          initialDate={dayViewDate}
           onClose={closeModal}
           onSaved={handleSavedTask}
           onUnscheduled={handleUnscheduledTask}

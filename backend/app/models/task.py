@@ -13,8 +13,6 @@ class Task(Base):
     equipment = Column(String(255))
     base_time = Column(Float)
     time_per_replicate = Column(Float)
-    min_step = Column(Integer)
-    max_step = Column(Integer)
     scheduled_date = Column(Date, nullable=True)
     person_id = Column(Integer, ForeignKey("people.id"), nullable=True)
     position = Column(Integer, nullable=True)

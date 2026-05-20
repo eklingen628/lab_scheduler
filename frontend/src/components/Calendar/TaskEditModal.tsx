@@ -24,8 +24,6 @@ type FormState = {
   equipment: string;
   base_time: string;
   time_per_replicate: string;
-  min_step: string;
-  max_step: string;
   person_id: string;
   scheduled_date: string;
 };
@@ -38,8 +36,6 @@ function taskToForm(task: Task): FormState {
     equipment: task.equipment ?? '',
     base_time: String(task.base_time),
     time_per_replicate: task.time_per_replicate != null ? String(task.time_per_replicate) : '',
-    min_step: task.min_step != null ? String(task.min_step) : '',
-    max_step: task.max_step != null ? String(task.max_step) : '',
     person_id: task.person_id != null ? String(task.person_id) : '',
     scheduled_date: task.scheduled_date ?? '',
   };
@@ -53,8 +49,6 @@ function emptyForm(initialPersonId?: number | null, initialDate?: string | null)
     equipment: '',
     base_time: '',
     time_per_replicate: '',
-    min_step: '',
-    max_step: '',
     person_id: initialPersonId != null ? String(initialPersonId) : '',
     scheduled_date: initialDate ?? '',
   };
@@ -85,8 +79,6 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
       equipment: form.equipment || null,
       base_time: form.base_time !== '' ? parseFloat(form.base_time) : null,
       time_per_replicate: form.time_per_replicate !== '' ? parseFloat(form.time_per_replicate) : null,
-      min_step: form.min_step !== '' ? parseInt(form.min_step, 10) : null,
-      max_step: form.max_step !== '' ? parseInt(form.max_step, 10) : null,
       person_id: form.person_id !== '' ? parseInt(form.person_id, 10) : null,
       scheduled_date: form.scheduled_date || null,
     };
@@ -144,14 +136,6 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
           <div className="grid grid-cols-[120px_1fr] items-center gap-2">
             <Label>Per replicate (h)</Label>
             <Input type="number" value={form.time_per_replicate} onChange={e => set('time_per_replicate', e.target.value)} />
-          </div>
-          <div className="grid grid-cols-[120px_1fr] items-center gap-2">
-            <Label>Min step</Label>
-            <Input type="number" value={form.min_step} onChange={e => set('min_step', e.target.value)} />
-          </div>
-          <div className="grid grid-cols-[120px_1fr] items-center gap-2">
-            <Label>Max step</Label>
-            <Input type="number" value={form.max_step} onChange={e => set('max_step', e.target.value)} />
           </div>
           <div className="grid grid-cols-[120px_1fr] items-center gap-2">
             <Label>Person</Label>

@@ -125,10 +125,6 @@ export default function DayViewTask({ task, sampleTests = [], ghost = false, isD
             <span className='day-view-task-field-value'>{task.time_per_replicate != null ? `${task.time_per_replicate}h` : '—'}</span>
           </div>
           <div className="day-view-task-field">
-            <span className="day-view-task-label">Steps</span>
-            <span className='day-view-task-field-value'>{task.min_step ?? '—'} – {task.max_step ?? '—'}</span>
-          </div>
-          <div className="day-view-task-field">
             <span className="day-view-task-label">Group ID</span>
             <span className='day-view-task-field-value'>{task.sample_test_group_id}</span>
           </div>

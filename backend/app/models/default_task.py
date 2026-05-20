@@ -13,8 +13,6 @@ class DefaultTask(Base):
     description = Column(String(255))
     base_time = Column(Float)
     time_per_replicate = Column(Float)
-    min_step = Column(Integer)
-    max_step = Column(Integer)
 
 
 

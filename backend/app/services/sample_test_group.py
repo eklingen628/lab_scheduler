@@ -42,8 +42,6 @@ def create_sample_test_group(db: Session, data: SampleTestGroupCreate) -> Sample
                 equipment=template_task.equipment,
                 base_time=template_task.base_time,
                 time_per_replicate=template_task.time_per_replicate,
-                min_step=template_task.min_step,
-                max_step=template_task.max_step,
             )
             
             db.add(task)

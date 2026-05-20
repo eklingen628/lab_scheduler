@@ -15,8 +15,6 @@ export type Task = {
   equipment: string | null
   base_time: number
   time_per_replicate: number | null
-  min_step: number | null
-  max_step: number | null
   scheduled_date: string | null  // ISO date
   person_id: number | null
   position: number | null
@@ -55,8 +53,6 @@ export interface TemplateTask {
   equipment: string | null
   base_time: number | null
   time_per_replicate: number | null
-  min_step: number | null
-  max_step: number | null
 }
 
 export interface TemplateTestNameAlias {

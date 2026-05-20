@@ -42,8 +42,6 @@ export default function TemplateNew() {
             equipment: t.equipment || null,
             base_time: parseFloat_(t.base_time),
             time_per_replicate: parseFloat_(t.time_per_replicate),
-            min_step: parseInt_(t.min_step),
-            max_step: parseInt_(t.max_step),
           })
         ),
       ]);

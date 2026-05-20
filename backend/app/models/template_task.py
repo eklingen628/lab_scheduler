@@ -15,6 +15,4 @@ class TemplateTask(Base):
     equipment = Column(String(255))
     base_time = Column(Float)
     time_per_replicate = Column(Float)
-    min_step = Column(Integer)
-    max_step = Column(Integer)
     template = relationship("Template", back_populates="template_tasks")

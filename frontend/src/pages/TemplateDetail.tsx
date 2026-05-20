@@ -26,8 +26,6 @@ function taskToLocal(t: TemplateTask): LocalTask {
     equipment: t.equipment ?? '',
     base_time: t.base_time?.toString() ?? '',
     time_per_replicate: t.time_per_replicate?.toString() ?? '',
-    min_step: t.min_step?.toString() ?? '',
-    max_step: t.max_step?.toString() ?? '',
   };
 }
 
@@ -95,8 +93,6 @@ export default function TemplateDetail() {
             equipment: t.equipment || null,
             base_time: parseFloat_(t.base_time),
             time_per_replicate: parseFloat_(t.time_per_replicate),
-            min_step: parseInt_(t.min_step),
-            max_step: parseInt_(t.max_step),
           };
           return t.id
             ? patch(`/template-tasks/${t.id}`, body)

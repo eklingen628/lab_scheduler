@@ -9,8 +9,6 @@ class TemplateTaskBase(BaseModel):
     equipment: str | None = None
     base_time: float | None = None
     time_per_replicate: float | None = None
-    min_step: int | None = None
-    max_step: int | None = None
 
 
 class TemplateTaskCreate(TemplateTaskBase):

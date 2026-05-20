@@ -16,8 +16,6 @@ export interface LocalTask {
   equipment: string;
   base_time: string;
   time_per_replicate: string;
-  min_step: string;
-  max_step: string;
 }
 
 export interface FormSaveData {
@@ -46,8 +44,6 @@ const TASK_FIELDS: { key: keyof Omit<LocalTask, 'localId' | 'id'>; label: string
   { key: 'equipment',          label: 'Equipment' },
   { key: 'base_time',          label: 'Base Time',    numeric: true },
   { key: 'time_per_replicate', label: 'Time/Rep',     numeric: true },
-  { key: 'min_step',           label: 'Min Step',     numeric: true },
-  { key: 'max_step',           label: 'Max Step',     numeric: true },
 ];
 
 function newLocalId() {
@@ -55,7 +51,7 @@ function newLocalId() {
 }
 
 function emptyTask(): LocalTask {
-  return { localId: newLocalId(), name: '', type: '', description: '', equipment: '', base_time: '', time_per_replicate: '', min_step: '', max_step: '' };
+  return { localId: newLocalId(), name: '', type: '', description: '', equipment: '', base_time: '', time_per_replicate: '',};
 }
 
 export default function TemplateForm({

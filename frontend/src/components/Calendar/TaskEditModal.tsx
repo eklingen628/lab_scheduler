@@ -93,6 +93,8 @@ function isAdHoc(f: AdHocTaskFormState | GroupedTaskFormState): f is AdHocTaskFo
 
 
 export default function TaskEditModal({ task, open, people, initialPersonId, initialDate, onClose, onSaved, onUnscheduled }: Props) {
+  const [formErrorModal, setFormErrorModal] = useState<string | null>(null)
+
   const isCreate = task === null;
   const [form, setForm] = useState<AdHocTaskFormState | GroupedTaskFormState>(() => {
     if (!task)
@@ -104,6 +106,7 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
 
   useEffect(() => {
     if (!open) return;
+    setFormErrorModal(null)
     setForm(!task ? emptyForm(initialPersonId, initialDate) : task.sample_test_group_id ? groupedTaskToForm(task) : adHocTaskToForm(task));
   }, [open, task]);
 
@@ -113,6 +116,12 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
   }
 
   async function handleSave() {
+    console.log(form.scheduled_date)
+    if ((!task || !task.sample_test_group_id) && (!form.person_id || !form.scheduled_date)) {
+      setFormErrorModal("The task is missing a person and/or scheduled date. These cannot be blank.")
+      return
+    }
+
     setSaving(true);
     const payload = {
       name: form.name || null,
@@ -230,6 +239,7 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
             <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
             <Button onClick={handleSave} disabled={saving}>Save</Button>
           </div>
+          {formErrorModal && <p className="text-red-500 text-sm">{formErrorModal}</p>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

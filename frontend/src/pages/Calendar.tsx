@@ -373,6 +373,7 @@ export default function Calendar() {
   function handleUnscheduledTask(taskId: number) {
     setTasks(prev => prev.filter(t => t.id !== taskId));
     setScheduledOverrides(prev => new Map(prev).set(taskId, false));
+    fetchGroups();
     closeModal();
   }
 

@@ -11,8 +11,8 @@
   --bg: #fff;
   --border: oklch(0.922 0 0);
   --code-bg: #f4f3ec;
-  --accent: oklch(0.97 0 0);
-  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent: oklch(0% 0 0);
+  --accent-bg: rgba(150, 150, 150, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:

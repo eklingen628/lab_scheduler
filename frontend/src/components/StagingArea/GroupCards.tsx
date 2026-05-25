@@ -33,8 +33,14 @@ function getGroupStatus(group: SampleTestGroup): FilterStatus {
 }
 
 
+type DialogState =
+  | { kind: 'alert'; message: string }
+  | { kind: 'confirm'; message: string; onConfirm: () => void }
+  | null;
+
 export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd, onRemove, onDelete, onUnschedule, adding }: Props) {
   const [activeFilters, setActiveFilters] = useState<Set<FilterStatus>>(new Set());
+  const [dialog, setDialog] = useState<DialogState>(null);
 
   function toggleFilter(status: FilterStatus) {
     setActiveFilters(prev => {
@@ -59,6 +65,25 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
   const count = selectedTestsToAdd.size;
 
   return (
+    <>
+    {dialog && (
+      <div className="modal-overlay" onClick={() => setDialog(null)}>
+        <div className="modal-card" onClick={e => e.stopPropagation()}>
+          <p style={{ margin: '0 0 20px', fontSize: '0.9rem', color: '#333' }}>{dialog.message}</p>
+          <div className="modal-actions">
+            {dialog.kind === 'confirm' && (
+              <button className="modal-btn modal-btn--cancel" onClick={() => setDialog(null)}>Cancel</button>
+            )}
+            <button
+              className="modal-btn modal-btn--confirm"
+              onClick={() => { if (dialog.kind === 'confirm') dialog.onConfirm(); setDialog(null); }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     <div className="group-cards">
       <div className="group-controls">
         <div className="group-filters">
@@ -108,10 +133,11 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
                   className="delete-group-btn"
                   disabled={hasScheduled}
                   title={hasScheduled ? 'Unschedule all tasks before deleting this group.' : undefined}
-                  onClick={() => {
-                    if (window.confirm(`Delete Group ${group.id} and release its tests back to the pool?`))
-                      onDelete(group.id);
-                  }}
+                  onClick={() => setDialog({
+                    kind: 'confirm',
+                    message: `Delete Group ${group.id} and release its tests back to the pool?`,
+                    onConfirm: () => onDelete(group.id),
+                  })}
                 >
                   Delete Group
                 </button>
@@ -145,11 +171,14 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
                                 onClick={() => {
                                   if (inGroup.length === 1) {
                                     if (hasScheduled) {
-                                      window.alert(`Cannot remove the last test: Group ${group.id} has scheduled tasks. Unschedule them first.`);
+                                      setDialog({ kind: 'alert', message: `Cannot remove the last test: Group ${group.id} has scheduled tasks. Unschedule them first.` });
                                       return;
                                     }
-                                    if (window.confirm(`This is the last test in Group ${group.id}. Removing it will delete the group.`))
-                                      onDelete(group.id);
+                                    setDialog({
+                                      kind: 'confirm',
+                                      message: `This is the last test in Group ${group.id}. Removing it will delete the group.`,
+                                      onConfirm: () => onDelete(group.id),
+                                    });
                                   } else {
                                     onRemove(test.id);
                                   }
@@ -205,5 +234,6 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
         })
       )}
     </div>
+    </>
   );
 }

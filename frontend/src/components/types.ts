@@ -35,6 +35,7 @@ export interface SampleTest {
   pr_comp: boolean | null
   number_of: number | null
   method: string | null
+  available_date: string | null
 }
 
 export interface Template {

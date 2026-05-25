@@ -2,23 +2,36 @@ import { useEffect, useState } from 'react';
 import { get, post, del, patch } from '../api';
 import type { SampleTest, SampleTestGroup } from '../components/types';
 import CreateGroupModal from '../components/StagingArea/CreateGroupModal';
-import TestPool from '../components/StagingArea/TestPool';
-import GroupList from '@/components/StagingArea/GroupList';
+import GroupsPane from '@/components/StagingArea/GroupsPane';
+import UnassignedPane from '@/components/StagingArea/UnassignedPane';
+import Toolbar from '@/components/StagingArea/Toolbar';
+import SplitContainer from '@/components/StagingArea/SplitContainer';
+import { usePersistedState } from '@/components/StagingArea/usePersistedState';
 import '../components/StagingArea/StagingArea.css';
 import { StagingAreaContext } from '@/components/StagingArea/StangingAreaContext';
 
+type ViewMode = 'side-by-side' | 'stacked';
+
 export default function StagingArea() {
-  const [tests, setTests] = useState<SampleTest[]>([]);
+  const [tests, setTests]   = useState<SampleTest[]>([]);
   const [groups, setGroups] = useState<SampleTestGroup[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [showModal, setShowModal]   = useState(false);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(false);
   const [selectedTestsToAdd, setSelectedTestsToAdd] = useState<Set<number>>(new Set());
   const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const [viewMode, setViewMode] = usePersistedState<ViewMode>(
+    'testScheduler.viewMode', 'side-by-side'
+  );
+  const [sideBySideRatio, setSideBySideRatio] = usePersistedState(
+    'testScheduler.splitRatio.sideBySide', 0.5
+  );
+  const [stackedRatio, setStackedRatio] = usePersistedState(
+    'testScheduler.splitRatio.stacked', 0.5
+  );
+
+  useEffect(() => { fetchData(); }, []);
 
   async function fetchData() {
     try {
@@ -93,44 +106,31 @@ export default function StagingArea() {
     await refresh();
   }
 
-  if (loading) return <div className="staging-layout" style={{ padding: '2rem' }}>Loading...</div>;
-  if (error) return <div className="staging-layout" style={{ padding: '2rem' }}>Failed to load data.</div>;
+  if (loading) return <div className="staging-page" style={{ padding: '2rem' }}>Loading...</div>;
+  if (error)   return <div className="staging-page" style={{ padding: '2rem' }}>Failed to load data.</div>;
+
+  const ratio    = viewMode === 'side-by-side' ? sideBySideRatio : stackedRatio;
+  const setRatio = viewMode === 'side-by-side' ? setSideBySideRatio : setStackedRatio;
 
   return (
-
-        <StagingAreaContext.Provider value={{
-          tests,
-          groups,
-          selectedTestsToAdd,
-          adding,
-          showModal,
-          loading,
-          error,
-          refresh,
-          toggleSelect,
-          handleAdd,	
-          handleRemove,
-          handleDeleteGroup,
-          handleUnschedule,
-          handleCreateGroupWithTests,
-          setShowModal,
-          setSelectedTestsToAdd,
-
-
-        }}>
-
-
-      <div className="staging-layout">
-        <TestPool/>
-        <div className="staging-main">
-          <GroupList/>
-        </div>
-
-        {showModal && (
-          <CreateGroupModal/>
-        )}
+    <StagingAreaContext.Provider value={{
+      tests, groups, selectedTestsToAdd, adding, showModal, loading, error,
+      refresh, toggleSelect, handleAdd, handleRemove, handleDeleteGroup,
+      handleUnschedule, handleCreateGroupWithTests, setShowModal, setSelectedTestsToAdd,
+    }}>
+      <div className="staging-page">
+        <Toolbar viewMode={viewMode} setViewMode={setViewMode} />
+        <SplitContainer
+          orientation={viewMode === 'side-by-side' ? 'horizontal' : 'vertical'}
+          ratio={ratio}
+          onRatioChange={setRatio}
+          reverseOrder={viewMode === 'stacked'}
+        >
+          <UnassignedPane />
+          <GroupsPane />
+        </SplitContainer>
+        {showModal && <CreateGroupModal />}
       </div>
     </StagingAreaContext.Provider>
-
   );
 }

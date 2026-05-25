@@ -56,11 +56,6 @@ def create_sample_test_group(db: Session, data: SampleTestGroupCreate) -> Sample
 
 
 
-def create_sample_test_group_empty(db: Session):
-    sample_test_group = SampleTestGroup()
-    db.add(sample_test_group)
-    db.flush()
-    return sample_test_group
 
 
 

@@ -17,7 +17,7 @@ interface Props {
   onUnscheduled: (taskId: number) => void;
 }
 
-type FormState = {
+type GroupedTaskFormState = {
   name: string;
   type: string;
   description: string;
@@ -28,7 +28,21 @@ type FormState = {
   scheduled_date: string;
 };
 
-function taskToForm(task: Task): FormState {
+type AdHocTaskFormState = {
+  name: string;
+  type: string;
+  description: string;
+  project: string;
+  method: string;
+  test_name: string;
+  equipment: string;
+  base_time: string;
+  time_per_replicate: string;
+  person_id: string;
+  scheduled_date: string;
+};
+
+function groupedTaskToForm(task: Task): GroupedTaskFormState {
   return {
     name: task.name,
     type: task.type ?? '',
@@ -41,11 +55,30 @@ function taskToForm(task: Task): FormState {
   };
 }
 
-function emptyForm(initialPersonId?: number | null, initialDate?: string | null): FormState {
+function adHocTaskToForm(task: Task): AdHocTaskFormState {
+  return {
+    name: task.name,
+    type: task.type ?? '',
+    description: task.description ?? '',
+    project: task.project ?? '',
+    method: task.method ?? '',
+    test_name: task.test_name ?? '',
+    equipment: task.equipment ?? '',
+    base_time: String(task.base_time),
+    time_per_replicate: task.time_per_replicate != null ? String(task.time_per_replicate) : '',
+    person_id: task.person_id != null ? String(task.person_id) : '',
+    scheduled_date: task.scheduled_date ?? '',
+  };
+}
+
+function emptyForm(initialPersonId?: number | null, initialDate?: string | null): AdHocTaskFormState {
   return {
     name: '',
     type: '',
     description: '',
+    project: '',
+    method: '',
+    test_name: '',
     equipment: '',
     base_time: '',
     time_per_replicate: '',
@@ -54,19 +87,28 @@ function emptyForm(initialPersonId?: number | null, initialDate?: string | null)
   };
 }
 
+function isAdHoc(f: AdHocTaskFormState | GroupedTaskFormState): f is AdHocTaskFormState {
+  return 'project' in f;
+}
+
+
 export default function TaskEditModal({ task, open, people, initialPersonId, initialDate, onClose, onSaved, onUnscheduled }: Props) {
   const isCreate = task === null;
-  const [form, setForm] = useState<FormState>(() =>
-    task ? taskToForm(task) : emptyForm(initialPersonId, initialDate)
-  );
+  const [form, setForm] = useState<AdHocTaskFormState | GroupedTaskFormState>(() => {
+    if (!task)
+      return emptyForm(initialPersonId, initialDate)
+    else 
+      return task.sample_test_group_id ? groupedTaskToForm(task) : adHocTaskToForm(task)
+  });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setForm(task ? taskToForm(task) : emptyForm(initialPersonId, initialDate));
+    setForm(!task ? emptyForm(initialPersonId, initialDate) : task.sample_test_group_id ? groupedTaskToForm(task) : adHocTaskToForm(task));
   }, [open, task]);
 
-  function set(field: keyof FormState, value: string) {
+  // keyof AdHocTaskFormState because it has all fields from both form types
+  function set(field: keyof AdHocTaskFormState, value: string) {
     setForm(prev => ({ ...prev, [field]: value }));
   }
 
@@ -76,6 +118,9 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
       name: form.name || null,
       type: form.type || null,
       description: form.description || null,
+      project: isAdHoc(form) ? form.project || null : null,
+      method: isAdHoc(form) ? form.method || null : null,
+      test_name: isAdHoc(form) ? form.test_name || null : null,      
       equipment: form.equipment || null,
       base_time: form.base_time !== '' ? parseFloat(form.base_time) : null,
       time_per_replicate: form.time_per_replicate !== '' ? parseFloat(form.time_per_replicate) : null,
@@ -125,6 +170,24 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
             <Label>Description</Label>
             <Input value={form.description} onChange={e => set('description', e.target.value)} />
           </div>
+
+          {isAdHoc(form) && (
+            <>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                <Label>Project</Label>
+                <Input value={form.project} onChange={e => set('project', e.target.value)} />
+              </div>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                <Label>Method</Label>
+                <Input value={form.method} onChange={e => set('method', e.target.value)} />
+              </div>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                <Label>Test Name</Label>
+                <Input value={form.test_name} onChange={e => set('test_name', e.target.value)} />
+              </div>            
+            </>
+          )}
+
           <div className="grid grid-cols-[120px_1fr] items-center gap-2">
             <Label>Equipment</Label>
             <Input value={form.equipment} onChange={e => set('equipment', e.target.value)} />

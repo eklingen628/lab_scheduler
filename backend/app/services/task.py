@@ -3,7 +3,6 @@ from sqlalchemy.sql.expression import and_
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate, TaskCreateFromScratch
 from app.exceptions import DateRangeError
-from app.services.sample_test_group import create_sample_test_group_empty
 from datetime import date
 
 
@@ -15,8 +14,7 @@ def create_task_from_group(db: Session, data: TaskCreate) -> Task | None:
 
 
 def create_task_from_scratch(db: Session, data: TaskCreateFromScratch) -> Task | None:
-    sample_test_group = create_sample_test_group_empty(db)
-    task = Task(**data.model_dump(), sample_test_group_id=sample_test_group.id)
+    task = Task(**data.model_dump())
     db.add(task)
     db.commit()
     return task

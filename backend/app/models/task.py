@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 class Task(Base):
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True)
-    sample_test_group_id = Column(Integer, ForeignKey("sample_test_groups.id", ondelete="CASCADE"))
+    sample_test_group_id = Column(Integer, ForeignKey("sample_test_groups.id", ondelete="CASCADE"), nullable=True)
     type = Column(String(255))
     name = Column(String(255))
     description = Column(String(255))
@@ -18,3 +18,6 @@ class Task(Base):
     position = Column(Integer, nullable=True)
     sample_test_group = relationship("SampleTestGroup", back_populates="tasks")
     person = relationship("Person")
+    project = Column(String(255), nullable=True)
+    test_name = Column(String(255), nullable=True)
+    method = Column(String(255), nullable=True)

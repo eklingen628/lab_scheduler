@@ -12,6 +12,9 @@ class TaskBase(BaseModel):
     scheduled_date: date | None = None
     person_id: int | None = None
     position: int | None = None
+    project: str | None = None
+    test_name: str | None = None
+    method: str | None = None
 
 
 class TaskCreate(TaskBase):

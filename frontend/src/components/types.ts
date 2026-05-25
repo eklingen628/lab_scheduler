@@ -8,7 +8,7 @@ export interface Person {
 
 export type Task = {
   id: number
-  sample_test_group_id: number
+  sample_test_group_id: number | null
   type: string | null
   name: string
   description: string | null
@@ -18,6 +18,9 @@ export type Task = {
   scheduled_date: string | null  // ISO date
   person_id: number | null
   position: number | null
+  project: string | null
+  test_name: string | null
+  method: string | null
 }
 
 export interface SampleTest {

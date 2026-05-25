@@ -15,10 +15,14 @@ function formatShortDate(iso: string): string {
 }
 
 export default function DayViewTask({ task, sampleTests = [], ghost = false, isDragOverlay = false }: Props) {
-  const projects  = [...new Set(sampleTests.map(st => st.project).filter((v): v is string => v !== null))];
+
+
+  const projects  = sampleTests.length > 0 ? [...new Set(sampleTests.map(st => st.project).filter((v): v is string => v !== null))] : task.project ? [task.project] : [];
+  const testNames = sampleTests.length > 0 ? [...new Set(sampleTests.map(st => st.test_name).filter((v): v is string => v !== null))] : task.test_name ? [task.test_name] : [];
+  const methods   = sampleTests.length > 0 ? [...new Set(sampleTests.map(st => st.method).filter((v): v is string => v !== null))] : task.method ? [task.method] : [];
+
+
   const clients   = [...new Set(sampleTests.map(st => st.client).filter((v): v is string => v !== null))];
-  const testNames = [...new Set(sampleTests.map(st => st.test_name).filter((v): v is string => v !== null))];
-  const methods   = [...new Set(sampleTests.map(st => st.method).filter((v): v is string => v !== null))];
   const specSheets = [...new Set(sampleTests.map(st => st.spec_sheet).filter((v): v is string => v !== null))];
   const otherDocs  = [...new Set(sampleTests.map(st => st.other_testing_documents).filter((v): v is string => v !== null))];
 

@@ -110,10 +110,32 @@ export default function GroupsPane() {
       result = result.filter(({ group }) => group.tasks.length === 0);
     }
     if (searchLower) {
-      result = result.filter(({ group }) => {
+      result = result.filter(({ group, inGroup }) => {
         const nameMatch = `group ${group.id}`.includes(searchLower);
-        const taskMatch = group.tasks.some(t => (t.name ?? '').toLowerCase().includes(searchLower));
-        return nameMatch || taskMatch;
+        const taskMatch = group.tasks.some(t =>
+          (t.name ?? '').toLowerCase().includes(searchLower) ||
+          (t.type ?? '').toLowerCase().includes(searchLower) ||
+          (t.description ?? '').toLowerCase().includes(searchLower) ||
+          (t.equipment ?? '').toLowerCase().includes(searchLower) ||
+          (t.project ?? '').toLowerCase().includes(searchLower) ||
+          (t.test_name ?? '').toLowerCase().includes(searchLower) ||
+          (t.method ?? '').toLowerCase().includes(searchLower) ||
+          (t.scheduled_date ?? '').includes(searchLower)
+        );
+        const testMatch = inGroup.some(t =>
+          String(t.test_key).includes(searchLower) ||
+          (t.sample_id ?? '').toLowerCase().includes(searchLower) ||
+          (t.test_name ?? '').toLowerCase().includes(searchLower) ||
+          (t.project ?? '').toLowerCase().includes(searchLower) ||
+          (t.status ?? '').toLowerCase().includes(searchLower) ||
+          (t.client ?? '').toLowerCase().includes(searchLower) ||
+          (t.method ?? '').toLowerCase().includes(searchLower) ||
+          (t.due_date ?? '').includes(searchLower) ||
+          (t.available_date ?? '').includes(searchLower) ||
+          (t.spec_sheet ?? '').toLowerCase().includes(searchLower) ||
+          (t.other_testing_documents ?? '').toLowerCase().includes(searchLower)
+        );
+        return nameMatch || taskMatch || testMatch;
       });
     }
 

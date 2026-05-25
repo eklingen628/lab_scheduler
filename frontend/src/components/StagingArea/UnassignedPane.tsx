@@ -2,17 +2,17 @@ import { useState, useContext, useMemo } from 'react';
 import { StagingAreaContext } from './StangingAreaContext';
 import FilterDropdown from './FilterDropdown';
 
-type SortField = 'test_key' | 'sample_id' | 'test_name' | 'project' | 'due_date' | 'status';
+type SortField = 'sample_id' | 'test_name' | 'project' | 'available_date' | 'due_date' | 'status';
 type SortDir = 'asc' | 'desc';
 type Sort = { field: SortField; dir: SortDir };
 
 const COLS: { label: string; field: SortField }[] = [
-  { label: 'Test Key',  field: 'test_key'  },
-  { label: 'Sample ID', field: 'sample_id' },
-  { label: 'Test Name', field: 'test_name' },
-  { label: 'Project',   field: 'project'   },
-  { label: 'Due Date',  field: 'due_date'  },
-  { label: 'Status',    field: 'status'    },
+  { label: 'Sample ID',      field: 'sample_id'      },
+  { label: 'Test Name',      field: 'test_name'      },
+  { label: 'Project',        field: 'project'        },
+  { label: 'Available Date', field: 'available_date' },
+  { label: 'Due Date',       field: 'due_date'       },
+  { label: 'Status',         field: 'status'         },
 ];
 
 const STATUS_BADGE: Record<string, string> = {
@@ -320,10 +320,10 @@ export default function UnassignedPane() {
                         onClick={e => e.stopPropagation()}
                       />
                     </td>
-                    <td className="cell--mono">{test.test_key}</td>
                     <td className="cell--mono cell--secondary">{test.sample_id ?? '—'}</td>
                     <td>{test.test_name ?? '—'}</td>
                     <td className="cell--secondary cell--small">{test.project ?? '—'}</td>
+                    <td>{test.available_date ?? '—'}</td>
                     <td>{test.due_date ?? '—'}</td>
                     <td>
                       {test.status ? (

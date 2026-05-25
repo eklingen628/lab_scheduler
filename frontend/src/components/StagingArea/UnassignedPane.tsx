@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo, useRef, useEffect } from 'react';
+import { useState, useContext, useMemo } from 'react';
 import { StagingAreaContext } from './StangingAreaContext';
 import FilterDropdown from './FilterDropdown';
 
@@ -25,8 +25,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 export default function UnassignedPane() {
   const {
-    tests, groups, selectedTestsToAdd, toggleSelect, setSelectedTestsToAdd,
-    handleAdd, setShowModal, adding,
+    tests, selectedTestsToAdd, toggleSelect, setSelectedTestsToAdd, setShowModal,
   } = useContext(StagingAreaContext);
 
   const [sorts, setSorts]             = useState<Sort[]>([{ field: 'due_date', dir: 'asc' }]);
@@ -35,20 +34,7 @@ export default function UnassignedPane() {
   const [filterProjects, setFilterProjects] = useState<Set<string>>(new Set());
   const [dueDateFrom, setDueDateFrom] = useState('');
   const [dueDateTo,   setDueDateTo]   = useState('');
-  const [showMoveDropdown, setShowMoveDropdown] = useState(false);
   const [moveError, setMoveError] = useState<string | null>(null);
-
-  const moveRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onOutside(e: MouseEvent) {
-      if (moveRef.current && !moveRef.current.contains(e.target as Node)) {
-        setShowMoveDropdown(false);
-      }
-    }
-    if (showMoveDropdown) document.addEventListener('mousedown', onOutside);
-    return () => document.removeEventListener('mousedown', onOutside);
-  }, [showMoveDropdown]);
 
   const unassigned = useMemo(() => tests.filter(t => t.group_id === null), [tests]);
 
@@ -153,16 +139,6 @@ export default function UnassignedPane() {
     }
   }
 
-  async function moveTo(groupId: number) {
-    setShowMoveDropdown(false);
-    setMoveError(null);
-    try {
-      await handleAdd(groupId);
-    } catch {
-      setMoveError('Failed to move tests. Please try again.');
-    }
-  }
-
   const dueDateActive = !!(dueDateFrom || dueDateTo);
   const activeFilterCount = filterStatuses.size + filterProjects.size + (dueDateActive ? 1 : 0);
 
@@ -173,34 +149,13 @@ export default function UnassignedPane() {
         <span className="pane-count">{unassigned.length} tests</span>
         <span className="pane-selection-count">Selected: {selectedCount}</span>
         <div className="pane-controls">
-          <div className="move-to-wrapper" ref={moveRef}>
-            <button
-              className="staging-new-btn"
-              disabled={selectedCount === 0 || adding}
-              onClick={() => setShowMoveDropdown(v => !v)}
-            >
-              Move to ▾
-            </button>
-            {showMoveDropdown && (
-              <div className="move-to-dropdown">
-                {groups.length === 0 ? (
-                  <span className="move-to-empty">No groups yet</span>
-                ) : (
-                  groups.map(g => (
-                    <button key={g.id} className="move-to-option" onClick={() => moveTo(g.id)}>
-                      Group {g.id}
-                    </button>
-                  ))
-                )}
-                <button
-                  className="move-to-option move-to-option--new"
-                  onClick={() => { setShowMoveDropdown(false); setShowModal(true); }}
-                >
-                  + New group…
-                </button>
-              </div>
-            )}
-          </div>
+          <button
+            className="staging-new-btn"
+            disabled={selectedCount === 0}
+            onClick={() => setShowModal(true)}
+          >
+            + New group{selectedCount > 0 ? ` (${selectedCount})` : ''}
+          </button>
 
           {allStatuses.length > 0 && (
             <FilterDropdown label="Status" activeCount={filterStatuses.size}>

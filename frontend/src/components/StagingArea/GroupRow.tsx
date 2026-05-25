@@ -53,6 +53,7 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
   const [dialog, setDialog] = useState<DialogState>(null);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   const [testSortField, setTestSortField] = useState<TestSortField | null>(null);
   const [testSortDir,   setTestSortDir]   = useState<SortDir>('asc');
@@ -60,6 +61,12 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
   const count = selectedTestsToAdd.size;
   const status = getStatus(group);
   const hasScheduled = group.tasks.some(t => t.scheduled_date !== null);
+
+  useEffect(() => {
+    if (expanded) {
+      headerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [expanded]);
 
   const dueDates = inGroup.map(t => t.available_date).filter(Boolean) as string[];
   const sortedDueDates = [...dueDates].sort();
@@ -143,7 +150,7 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
       )}
 
       <div className={`group-row group-row--${status}`}>
-        <div className="group-row-header" onClick={onToggle}>
+        <div className="group-row-header" ref={headerRef} onClick={onToggle}>
           <div className="group-row-title-line">
             <span className="group-row-chevron">{expanded ? '▼' : '▶'}</span>
             <span className="group-row-name">Group {group.id}</span>

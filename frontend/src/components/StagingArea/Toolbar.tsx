@@ -1,6 +1,3 @@
-import { useContext } from 'react';
-import { StagingAreaContext } from './StangingAreaContext';
-
 type ViewMode = 'side-by-side' | 'stacked';
 
 interface Props {
@@ -9,9 +6,6 @@ interface Props {
 }
 
 export default function Toolbar({ viewMode, setViewMode }: Props) {
-  const { setShowModal, selectedTestsToAdd } = useContext(StagingAreaContext);
-  const count = selectedTestsToAdd.size;
-
   return (
     <div className="staging-toolbar">
       <div className="staging-view-switcher">
@@ -28,13 +22,6 @@ export default function Toolbar({ viewMode, setViewMode }: Props) {
           Stacked
         </button>
       </div>
-      <button
-        className="staging-new-btn"
-        onClick={() => setShowModal(true)}
-        disabled={count === 0}
-      >
-        + New group{count > 0 ? ` (${count})` : ''}
-      </button>
     </div>
   );
 }

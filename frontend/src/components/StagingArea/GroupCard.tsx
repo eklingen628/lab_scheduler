@@ -33,15 +33,16 @@ export default function GroupCard({ group, inGroup, hasScheduled }: GroupCardPro
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <p style={{ margin: '0 0 20px', fontSize: '0.9rem', color: '#333' }}>{dialog.message}</p>
             <div className="modal-actions">
-              {dialog.kind === 'confirm' && (
-                <button className="modal-btn modal-btn--cancel" onClick={() => setDialog(null)}>Cancel</button>
-              )}
               <button
                 className="modal-btn modal-btn--confirm"
                 onClick={() => { if (dialog.kind === 'confirm') dialog.onConfirm(); setDialog(null); }}
               >
                 OK
               </button>
+              {dialog.kind === 'confirm' && (
+                <button className="modal-btn modal-btn--cancel" onClick={() => setDialog(null)}>Cancel</button>
+              )}
+
             </div>
           </div>
         </div>

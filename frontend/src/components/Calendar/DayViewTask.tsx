@@ -1,6 +1,7 @@
 import { GripVertical } from 'lucide-react';
 import type { SampleTest, Task } from '../types';
 import './Calendar.css';
+import { uniqueField } from '../utils';
 
 interface Props {
   task: Task;
@@ -17,9 +18,9 @@ function formatShortDate(iso: string): string {
 export default function DayViewTask({ task, sampleTests = [], ghost = false, isDragOverlay = false }: Props) {
 
 
-  const projects  = sampleTests.length > 0 ? [...new Set(sampleTests.map(st => st.project).filter((v): v is string => v !== null))] : task.project ? [task.project] : [];
-  const testNames = sampleTests.length > 0 ? [...new Set(sampleTests.map(st => st.test_name).filter((v): v is string => v !== null))] : task.test_name ? [task.test_name] : [];
-  const methods   = sampleTests.length > 0 ? [...new Set(sampleTests.map(st => st.method).filter((v): v is string => v !== null))] : task.method ? [task.method] : [];
+  const projects  = sampleTests.length > 0 ? uniqueField(sampleTests, 'project') : task.project ? [task.project] : [];
+  const testNames = sampleTests.length > 0 ? uniqueField(sampleTests, 'test_name') : task.test_name ? [task.test_name] : [];
+  const methods   = sampleTests.length > 0 ? uniqueField(sampleTests, 'method') : task.method ? [task.method] : [];
 
 
   const clients   = [...new Set(sampleTests.map(st => st.client).filter((v): v is string => v !== null))];

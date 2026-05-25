@@ -3,6 +3,7 @@ import TestGroupRow from './TestGroupRow';
 import type { SampleTestGroup } from '../types';
 import './Sidebar.css';
 import { memo } from 'react';
+import { uniqueField } from '../utils';
 
 interface Props {
   scheduledOverrides: Map<number, boolean>;
@@ -28,12 +29,13 @@ function Sidebar({ scheduledOverrides, groupData, groupDataError }: Props) {
       className={`sidebar-view${isOver ? ' sidebar-view--over' : ''}`}
     >
       {groupData.map(group => {
-        const testNames = [...new Set(group.sample_tests.map(st => st.test_name).filter((n): n is string => n !== null))];
-        const projects = [...new Set(group.sample_tests.map(st => st.project).filter((p): p is string => p !== null))];
-        const clients = [...new Set(group.sample_tests.map(st => st.client).filter((c): c is string => c !== null))];
-        const specSheets = [...new Set(group.sample_tests.map(st => st.spec_sheet).filter((s): s is string => s !== null))];
-        const otherDocs = [...new Set(group.sample_tests.map(st => st.other_testing_documents).filter((d): d is string => d !== null))];
-        const methods = [...new Set(group.sample_tests.map(st => st.method).filter((m): m is string => m !== null))];
+        const testNames = uniqueField(group.sample_tests, 'test_name')
+        const projects = uniqueField(group.sample_tests, 'project')
+        const clients = uniqueField(group.sample_tests, 'client')
+        const specSheets = uniqueField(group.sample_tests, 'spec_sheet')
+        const otherDocs = uniqueField(group.sample_tests, 'other_testing_documents')
+        const methods = uniqueField(group.sample_tests, 'method')
+
         return (
           <TestGroupRow
             key={group.id}

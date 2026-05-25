@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { get } from '../../api';
 import type { Template } from '../types';
+import { StagingAreaContext } from './StangingAreaContext';
 
-interface Props {
-  onConfirm: (templateIds: number[]) => Promise<void>;
-  onCancel: () => void;
-}
 
-export default function CreateGroupModal({ onConfirm, onCancel }: Props) {
+export default function CreateGroupModal() {
+
+  const { setShowModal, handleCreateGroupWithTests } = useContext(StagingAreaContext);
+
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -31,14 +31,14 @@ export default function CreateGroupModal({ onConfirm, onCancel }: Props) {
   async function handleConfirm() {
     setSubmitting(true);
     try {
-      await onConfirm([...selectedIds]);
+      await handleCreateGroupWithTests([...selectedIds]);
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="modal-overlay" onClick={onCancel}>
+    <div className="modal-overlay" onClick={() => setShowModal(false)}>
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <h3>Create Group</h3>
         <p className="modal-subtitle">Select templates to apply to this group.</p>
@@ -69,7 +69,7 @@ export default function CreateGroupModal({ onConfirm, onCancel }: Props) {
           </ul>
         )}
         <div className="modal-actions">
-          <button className="modal-btn modal-btn--cancel" onClick={onCancel}>Cancel</button>
+          <button className="modal-btn modal-btn--cancel" onClick={() => setShowModal(false)}>Cancel</button>
           <button
             className="modal-btn modal-btn--confirm"
             onClick={handleConfirm}

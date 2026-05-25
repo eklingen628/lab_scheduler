@@ -1,16 +1,8 @@
-import { useState } from 'react';
-import type { SampleTest, SampleTestGroup } from '../types';
+import { useState, useContext } from 'react';
+import type { SampleTestGroup } from '../types';
+import { StagingAreaContext } from './StangingAreaContext';
 
-interface Props {
-  groups: SampleTestGroup[];
-  allTests: SampleTest[];
-  selectedTestsToAdd: Set<number>;
-  onAdd: (groupId: number) => Promise<void>;
-  onRemove: (testId: number) => Promise<void>;
-  onDelete: (groupId: number) => Promise<void>;
-  onUnschedule: (taskId: number) => Promise<void>;
-  adding: boolean;
-}
+
 
 type FilterStatus = 'full' | 'partial' | 'none';
 
@@ -38,7 +30,10 @@ type DialogState =
   | { kind: 'confirm'; message: string; onConfirm: () => void }
   | null;
 
-export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd, onRemove, onDelete, onUnschedule, adding }: Props) {
+export default function GroupCards() {
+  const { groups, tests, selectedTestsToAdd, handleAdd, handleRemove, handleDeleteGroup, handleUnschedule, adding } = useContext(StagingAreaContext);
+  
+  
   const [activeFilters, setActiveFilters] = useState<Set<FilterStatus>>(new Set());
   const [dialog, setDialog] = useState<DialogState>(null);
 
@@ -110,7 +105,7 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
         </div>
       ) : (
         filteredGroups.map(group => {
-          const inGroup = allTests.filter(t => t.group_id === group.id);
+          const inGroup = tests.filter(t => t.group_id === group.id);
           const hasScheduled = group.tasks.some(t => t.scheduled_date !== null);
 
           return (
@@ -125,7 +120,7 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
                 <button
                   className="staging-new-btn"
                   disabled={count === 0 || adding}
-                  onClick={() => onAdd(group.id)}
+                  onClick={() => handleAdd(group.id)}
                 >
                   {adding ? 'Adding…' : `Add Selected (${count}) ▸`}
                 </button>
@@ -136,7 +131,7 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
                   onClick={() => setDialog({
                     kind: 'confirm',
                     message: `Delete Group ${group.id} and release its tests back to the pool?`,
-                    onConfirm: () => onDelete(group.id),
+                    onConfirm: () => handleDeleteGroup(group.id),
                   })}
                 >
                   Delete Group
@@ -177,10 +172,10 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
                                     setDialog({
                                       kind: 'confirm',
                                       message: `This is the last test in Group ${group.id}. Removing it will delete the group.`,
-                                      onConfirm: () => onDelete(group.id),
+                                      onConfirm: () => handleDeleteGroup(group.id),
                                     });
                                   } else {
-                                    onRemove(test.id);
+                                    handleRemove(test.id);
                                   }
                                 }}
                               >
@@ -217,7 +212,7 @@ export default function GroupCards({ groups, allTests, selectedTestsToAdd, onAdd
                             <td>{task.scheduled_date ?? <span className="unscheduled-label">Unscheduled</span>}</td>
                             <td>
                               {task.scheduled_date && (
-                                <button className="remove-btn" onClick={() => onUnschedule(task.id)}>
+                                <button className="remove-btn" onClick={() => handleUnschedule(task.id)}>
                                   Remove from Schedule
                                 </button>
                               )}

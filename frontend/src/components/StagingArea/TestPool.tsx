@@ -1,13 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import type { SampleTest } from '../types';
+import { StagingAreaContext } from './StangingAreaContext';
 
-interface Props {
-  allTests: SampleTest[];
-  onNew: () => void;
-  onToggle: (id: number) => void;
-  selectedTestsToAdd: Set<number>;
-  onMount: () => void;
-}
+
 
 type SortField = 'test_key' | 'sample_id' | 'test_name' | 'project' | 'due_date' | 'status';
 type SortDir = 'asc' | 'desc';
@@ -40,12 +35,15 @@ function applySorts(tests: SampleTest[], sorts: Sort[]): SampleTest[] {
   });
 }
 
-export default function TestPool({ allTests, onNew, onToggle, selectedTestsToAdd, onMount }: Props) {
+export default function TestPool() {
+
+  const { tests, selectedTestsToAdd, setSelectedTestsToAdd, setShowModal, toggleSelect } = useContext(StagingAreaContext);
+
   const [collapsed, setCollapsed] = useState(false);
   const [sorts, setSorts] = useState<Sort[]>([]);
 
   useEffect(() => {
-    onMount();
+    setSelectedTestsToAdd(new Set())
   }, []);
 
   function toggleSort(field: SortField) {
@@ -57,7 +55,7 @@ export default function TestPool({ allTests, onNew, onToggle, selectedTestsToAdd
     });
   }
 
-  const available = applySorts(allTests.filter(t => t.group_id === null), sorts);
+  const available = applySorts(tests.filter(t => t.group_id === null), sorts);
   const count = selectedTestsToAdd.size;
 
   if (collapsed) {
@@ -75,7 +73,7 @@ export default function TestPool({ allTests, onNew, onToggle, selectedTestsToAdd
         {sorts.length > 0 && (
           <button className="control-clear-btn" onClick={() => setSorts([])}>Clear Sort</button>
         )}
-        <button className="staging-new-btn" onClick={onNew} disabled={count === 0}>
+        <button className="staging-new-btn" onClick={() => setShowModal(true)} disabled={count === 0}>
           + New Group{count > 0 ? ` (${count})` : ''}
         </button>
         <button className="pool-toggle" onClick={() => setCollapsed(true)}>◀</button>
@@ -110,13 +108,13 @@ export default function TestPool({ allTests, onNew, onToggle, selectedTestsToAdd
                 <tr
                   key={test.id}
                   className={selectedTestsToAdd.has(test.id) ? 'staging-row--selected' : ''}
-                  onClick={() => onToggle(test.id)}
+                  onClick={() => toggleSelect(test.id)}
                 >
                   <td>
                     <input
                       type="checkbox"
                       checked={selectedTestsToAdd.has(test.id)}
-                      onChange={() => onToggle(test.id)}
+                      onChange={() => toggleSelect(test.id)}
                       onClick={e => e.stopPropagation()}
                     />
                   </td>

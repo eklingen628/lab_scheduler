@@ -5,6 +5,7 @@ import CreateGroupModal from '../components/StagingArea/CreateGroupModal';
 import TestPool from '../components/StagingArea/TestPool';
 import GroupCards from '../components/StagingArea/GroupCards';
 import '../components/StagingArea/StagingArea.css';
+import { StagingAreaContext } from '@/components/StagingArea/StangingAreaContext';
 
 export default function StagingArea() {
   const [tests, setTests] = useState<SampleTest[]>([]);
@@ -96,33 +97,40 @@ export default function StagingArea() {
   if (error) return <div className="staging-layout" style={{ padding: '2rem' }}>Failed to load data.</div>;
 
   return (
-    <div className="staging-layout">
-      <TestPool
-        allTests={tests}
-        onNew={() => setShowModal(true)}
-        onToggle={toggleSelect}
-        selectedTestsToAdd={selectedTestsToAdd}
-        onMount={() => setSelectedTestsToAdd(new Set())}
-      />
-      <div className="staging-main">
-        <GroupCards
-          groups={groups}
-          allTests={tests}
-          selectedTestsToAdd={selectedTestsToAdd}
-          onAdd={handleAdd}
-          onRemove={handleRemove}
-          onDelete={handleDeleteGroup}
-          onUnschedule={handleUnschedule}
-          adding={adding}
-        />
-      </div>
 
-      {showModal && (
-        <CreateGroupModal
-          onConfirm={handleCreateGroupWithTests}
-          onCancel={() => setShowModal(false)}
-        />
-      )}
-    </div>
+        <StagingAreaContext.Provider value={{
+          tests,
+          groups,
+          selectedTestsToAdd,
+          adding,
+          showModal,
+          loading,
+          error,
+          refresh,
+          toggleSelect,
+          handleAdd,	
+          handleRemove,
+          handleDeleteGroup,
+          handleUnschedule,
+          handleCreateGroupWithTests,
+          setShowModal,
+          setSelectedTestsToAdd,
+
+
+        }}>
+
+
+      <div className="staging-layout">
+        <TestPool/>
+        <div className="staging-main">
+          <GroupCards/>
+        </div>
+
+        {showModal && (
+          <CreateGroupModal/>
+        )}
+      </div>
+    </StagingAreaContext.Provider>
+
   );
 }

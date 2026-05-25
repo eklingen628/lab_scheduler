@@ -3,7 +3,7 @@ import { get, post, del, patch } from '../api';
 import type { SampleTest, SampleTestGroup } from '../components/types';
 import CreateGroupModal from '../components/StagingArea/CreateGroupModal';
 import TestPool from '../components/StagingArea/TestPool';
-import GroupCards from '../components/StagingArea/GroupCards';
+import GroupList from '@/components/StagingArea/GroupList';
 import '../components/StagingArea/StagingArea.css';
 import { StagingAreaContext } from '@/components/StagingArea/StangingAreaContext';
 
@@ -123,7 +123,7 @@ export default function StagingArea() {
       <div className="staging-layout">
         <TestPool/>
         <div className="staging-main">
-          <GroupCards/>
+          <GroupList/>
         </div>
 
         {showModal && (

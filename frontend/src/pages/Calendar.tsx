@@ -414,6 +414,7 @@ export default function Calendar() {
       dates,
       dayViewPerson,
       dayViewDate,
+      sampleTestsByGroup,
     }}>
 
     
@@ -453,7 +454,6 @@ export default function Calendar() {
         <TaskEditModal
           task={editingTask}
           open={modalOpen}
-          people={people}
           initialPersonId={dayViewPerson?.id ?? null}
           initialDate={dayViewDate}
           onClose={closeModal}

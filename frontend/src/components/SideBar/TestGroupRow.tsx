@@ -21,7 +21,7 @@ interface Props {
 }
 
 function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, specSheets, otherDocs, methods, tasks, scheduledOverrides }: Props) {
-  const { onEditTask, goToPersonDate, selectedGroupId, setSelectedGroupId } = useContext(CalendarContext);
+  const { onEditTask, goToPersonDate, selectedGroupId, setSelectedGroupId, people } = useContext(CalendarContext);
   const isSelected = selectedGroupId === groupId;
   const isRowDimmed = selectedGroupId !== null && !isSelected;
 
@@ -52,23 +52,38 @@ function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, spec
           const isScheduled = override !== undefined ? override : task.scheduled_date !== null;
           const chipDimmed = selectedGroupId !== null && !isSelected;
           const chipHighlighted = isSelected;
-          return isScheduled
-            ? (
-              <ContextMenu key={task.id}>
-                <ContextMenuTrigger asChild>
-                  <div>
-                    <TaskChip task={task} scheduled dimmed={chipDimmed} highlighted={chipHighlighted} />
-                  </div>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem onClick={() => onEditTask(task)}>Edit</ContextMenuItem>
-                  {task.person_id && task.scheduled_date && (
-                    <ContextMenuItem onClick={() => goToPersonDate(task.person_id!, task.scheduled_date!)}>Go To Current</ContextMenuItem>
-                  )}
-                </ContextMenuContent>
-              </ContextMenu>
-            )
-            : <DraggableTaskChip key={task.id} task={task} />;
+          const person = task.person_id != null ? people.find(p => p.id === task.person_id) : null;
+          return (
+            <div key={task.id} className="sidebar-task-row">
+              <div className="sidebar-task-schedule-info">
+                {isScheduled && task.scheduled_date ? (
+                  <>
+                    <span className="sidebar-task-date">{task.scheduled_date}</span>
+                    {person && <span className="sidebar-task-person">{person.first_name} {person.last_name}</span>}
+                  </>
+                ) : (
+                  <span className="sidebar-task-unscheduled">Unscheduled</span>
+                )}
+              </div>
+              {isScheduled
+                ? (
+                  <ContextMenu>
+                    <ContextMenuTrigger asChild>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <TaskChip task={task} scheduled dimmed={chipDimmed} highlighted={chipHighlighted} />
+                      </div>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem onClick={() => onEditTask(task)}>Edit</ContextMenuItem>
+                      {task.person_id && task.scheduled_date && (
+                        <ContextMenuItem onClick={() => goToPersonDate(task.person_id!, task.scheduled_date!)}>Go To Current</ContextMenuItem>
+                      )}
+                    </ContextMenuContent>
+                  </ContextMenu>
+                )
+                : <div style={{ flex: 1, minWidth: 0 }}><DraggableTaskChip task={task} /></div>}
+            </div>
+          );
         })}
       </div>
     </div>

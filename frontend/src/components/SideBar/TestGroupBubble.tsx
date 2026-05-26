@@ -19,7 +19,7 @@ function formatShortDate(iso: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export default function TestGroupBubble({ groupId, sampleTests, testNames, projects, clients, specSheets, otherDocs, methods }: Props) {
+export default function TestGroupBubble({ groupId, sampleTests, testNames, projects, clients, methods }: Props) {
   const [hovered, setHovered] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -44,6 +44,13 @@ export default function TestGroupBubble({ groupId, sampleTests, testNames, proje
     if (closeTimer.current) clearTimeout(closeTimer.current);
   }
 
+  const rows: { label: string; value: string | null; mono: boolean }[] = [
+    { label: 'Project', value: projects.join(', ') || null,  mono: true  },
+    { label: 'Client',  value: clients.join(', ') || null,   mono: false },
+    { label: 'Tests',   value: testNames.join(', ') || null, mono: false },
+    { label: 'Method',  value: methods.join(', ') || null,   mono: true  },
+  ].filter(r => r.value !== null);
+
   return (
     <div
       ref={bubbleRef}
@@ -51,50 +58,25 @@ export default function TestGroupBubble({ groupId, sampleTests, testNames, proje
       onMouseEnter={hasSamples ? openPopover : undefined}
       onMouseLeave={hasSamples ? scheduleClose : undefined}
     >
-      <p className="sidebar-bubble-title">Group {groupId}</p>
+      <div className="sidebar-bubble-header">
+        <span className="sidebar-bubble-title">Group {groupId}</span>
+        {hasSamples && (
+          <span className="sidebar-bubble-sample-count">{sampleTests.length} samples</span>
+        )}
+      </div>
 
-      {projects.length > 0 && (
-        <div className="sidebar-bubble-row">
-          <span className="sidebar-bubble-label">Project</span>
-          <span>{projects.join(', ')}</span>
-        </div>
-      )}
-      {clients.length > 0 && (
-        <div className="sidebar-bubble-row">
-          <span className="sidebar-bubble-label">Client</span>
-          <span>{clients.join(', ')}</span>
-        </div>
-      )}
-      {testNames.length > 0 && (
-        <div className="sidebar-bubble-row">
-          <span className="sidebar-bubble-label">Tests</span>
-          <span>{testNames.join(', ')}</span>
-        </div>
-      )}
-      {methods.length > 0 && (
-        <div className="sidebar-bubble-row">
-          <span className="sidebar-bubble-label">Method</span>
-          <span>{methods.join(', ')}</span>
-        </div>
-      )}
-      {specSheets.length > 0 && (
-        <div className="sidebar-bubble-row">
-          <span className="sidebar-bubble-label">Spec</span>
-          <span>{specSheets.join(', ')}</span>
-        </div>
-      )}
-      {otherDocs.length > 0 && (
-        <div className="sidebar-bubble-row">
-          <span className="sidebar-bubble-label">Docs</span>
-          <span>{otherDocs.join(', ')}</span>
-        </div>
-      )}
-      {hasSamples && (
-        <div className="sidebar-bubble-row">
-          <span className="sidebar-bubble-label">Samples</span>
-          <span>{sampleTests.length}</span>
-        </div>
-      )}
+      <table className="sidebar-bubble-table">
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={row.label} className={i === rows.length - 1 ? 'sidebar-bubble-table-lastrow' : ''}>
+              <td className="sidebar-bubble-table-label">{row.label}</td>
+              <td className={`sidebar-bubble-table-value${row.mono ? ' sidebar-bubble-table-mono' : ''}`}>
+                {row.value}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {hovered && hasSamples && createPortal(
         <div

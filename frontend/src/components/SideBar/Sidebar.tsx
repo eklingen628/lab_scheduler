@@ -28,6 +28,11 @@ function Sidebar({ scheduledOverrides, groupData, groupDataError }: Props) {
       ref={setNodeRef}
       className={`sidebar-view${isOver ? ' sidebar-view--over' : ''}`}
     >
+      <div className='sidebar-header'>
+
+
+      </div>
+
       {groupData.map(group => {
         const testNames = uniqueField(group.sample_tests, 'test_name')
         const projects = uniqueField(group.sample_tests, 'project')

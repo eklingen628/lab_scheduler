@@ -63,7 +63,7 @@ export default function DayView({ sampleTestsByGroup, onEditTask, onAddTask }: P
               <SortableDayViewTask
                 key={task.id}
                 task={task}
-                sampleTests={sampleTestsByGroup.get(task.sample_test_group_id) ?? []}
+                sampleTests={task.sample_test_group_id != null ? (sampleTestsByGroup.get(task.sample_test_group_id) ?? []) : []}
                 onEdit={() => onEditTask(task)}
               />
             ))}

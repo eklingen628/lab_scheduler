@@ -27,6 +27,7 @@ function CalendarCell({ person, date, cellTasks, isToday, isSelected, isWeekend 
     <div
       className={`calendar-cell${isWeekend ? ' calendar-cell--weekend' : ''}${isToday ? ' calendar-cell--today' : ''}${isSelected ? ' calendar-cell--selected' : ''}${isOver ? ' calendar-cell--over' : ''}`}
       ref={setNodeRef}
+      data-cell={`${person.id}|${date}`}
       onDoubleClick={() => { setDayViewDate(date); setDayViewPerson(person); }}
     >
       <SortableContext items={cellTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>

@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.expression import and_
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate, TaskCreateFromScratch
-from app.exceptions import DateRangeError
+from app.exceptions import DateRangeError, MissingPersonDateError
 from datetime import date
 
 
@@ -14,6 +14,9 @@ def create_task_from_group(db: Session, data: TaskCreate) -> Task | None:
 
 
 def create_task_from_scratch(db: Session, data: TaskCreateFromScratch) -> Task | None:
+    
+    if not data.scheduled_date or not data.person_id:
+        raise MissingPersonDateError("Invalid, a task without a group ID must have an assigned scheduled date and person")
     task = Task(**data.model_dump())
     db.add(task)
     db.commit()

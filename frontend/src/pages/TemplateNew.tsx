@@ -10,10 +10,10 @@ function parseFloat_(s: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-function parseInt_(s: string): number | null {
-  const n = parseInt(s, 10);
-  return isNaN(n) ? null : n;
-}
+// function parseInt_(s: string): number | null {
+//   const n = parseInt(s, 10);
+//   return isNaN(n) ? null : n;
+// }
 
 export default function TemplateNew() {
   const navigate = useNavigate();

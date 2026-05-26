@@ -1,4 +1,4 @@
-import { Fragment, useContext, useMemo, useState } from 'react';
+import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import CalendarCell from './CalendarCell';
 import { ListFilter } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -28,6 +28,12 @@ export default function CalendarGrid() {
   const { people, dates, taskMap, dayViewPerson, personFilter, setPersonFilter, personSort, setPersonSort, dayViewDate } = useContext(CalendarContext)
   const selectedPersonId = dayViewPerson?.id ?? null
   const [popoverOpen, setPopoverOpen] = useState(false)
+
+  useEffect(() => {
+    if (!dayViewPerson || !dayViewDate) return;
+    const cell = document.querySelector(`[data-cell="${dayViewPerson.id}|${dayViewDate}"]`);
+    cell?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+  }, [dayViewPerson, dayViewDate]);
   const [draft, setDraft] = useState<Set<number> | null>(null)
   const [draftSort, setDraftSort] = useState<'asc' | 'desc' | null>(null)
 

@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Person, Task } from "../types";
+import type { Person, SampleTest, Task } from "../types";
 
 export const CalendarContext = createContext({
   // ── Week data ────────────────────────────────────────────────────────────────
@@ -39,4 +39,7 @@ export const CalendarContext = createContext({
   // When set, task chips from this group are highlighted; all others are dimmed
   selectedGroupId: null as number | null,
   setSelectedGroupId: (_: React.SetStateAction<number | null>) => {},
+
+  sampleTestsByGroup: new Map<number, SampleTest[]>,
+
 })

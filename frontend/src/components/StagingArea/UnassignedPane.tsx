@@ -34,7 +34,6 @@ export default function UnassignedPane() {
   const [filterProjects, setFilterProjects] = useState<Set<string>>(new Set());
   const [dueDateFrom, setDueDateFrom] = useState('');
   const [dueDateTo,   setDueDateTo]   = useState('');
-  const [moveError, setMoveError] = useState<string | null>(null);
 
   const unassigned = useMemo(() => tests.filter(t => t.group_id === null), [tests]);
 
@@ -262,8 +261,6 @@ export default function UnassignedPane() {
           />
         </div>
       </div>
-
-      {moveError && <div className="pane-error">{moveError}</div>}
 
       <div className="pane-body">
         {unassigned.length === 0 ? (

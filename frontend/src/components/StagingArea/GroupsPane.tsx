@@ -86,8 +86,7 @@ export default function GroupsPane() {
   const processed = useMemo(() => {
     let result = groups.map(g => {
       const inGroup = tests.filter(t => t.group_id === g.id);
-      const dueDates = inGroup.map(t => t.available_date).filter(Boolean) as string[];
-      const sortedDates = [...dueDates].sort();
+      const sortedDates = inGroup.map(t => t.available_date).filter(Boolean).sort() as string[];
       return {
         group: g,
         inGroup,

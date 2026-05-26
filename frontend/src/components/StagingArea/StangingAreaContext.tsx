@@ -14,12 +14,12 @@ export const StagingAreaContext = createContext({
 
     refresh: async () => {},
 
-    toggleSelect: (id: number) => {},
-    handleAdd: async (groupId: number) => {},	
-    handleRemove: async (testId: number) => {},
-    handleDeleteGroup: async (groupId: number) => {},
-    handleUnschedule: async (taskId: number) => {},
-    handleCreateGroupWithTests: async (templateIds: number[]) => {},
+    toggleSelect: (_id: number) => {},
+    handleAdd: async (_groupId: number) => {},	
+    handleRemove: async (_testId: number) => {},
+    handleDeleteGroup: async (_groupId: number) => {},
+    handleUnschedule: async (_taskId: number) => {},
+    handleCreateGroupWithTests: async (_templateIds: number[]) => {},
     setShowModal: (_: boolean) => {},
     setSelectedTestsToAdd: (_: Set<number>) => {},    
 

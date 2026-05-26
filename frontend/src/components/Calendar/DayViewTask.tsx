@@ -131,7 +131,7 @@ export default function DayViewTask({ task, sampleTests = [], ghost = false, isD
           </div>
           <div className="day-view-task-field">
             <span className="day-view-task-label">Group ID</span>
-            <span className='day-view-task-field-value'>{task.sample_test_group_id}</span>
+            <span className='day-view-task-field-value'>{task.sample_test_group_id ?? '—'}</span>
           </div>
         </div>
 

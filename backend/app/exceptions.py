@@ -5,3 +5,6 @@ class NotFoundError(Exception):
 
 class DateRangeError(Exception):
     pass
+
+class MissingPersonDateError(Exception):
+    pass

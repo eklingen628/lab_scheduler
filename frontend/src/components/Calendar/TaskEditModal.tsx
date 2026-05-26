@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
-import type { Task, Person } from '../types';
+import { useState, useEffect, useContext } from 'react';
+import type { Task } from '../types';
 import { post, patch } from '../../api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { uniqueField } from '../utils';
+import { CalendarContext } from './CalendarContext';
 
 interface Props {
   task: Task | null;
   open: boolean;
-  people: Person[];
   initialPersonId?: number | null;
   initialDate?: string | null;
   onClose: () => void;
@@ -92,7 +93,15 @@ function isAdHoc(f: AdHocTaskFormState | GroupedTaskFormState): f is AdHocTaskFo
 }
 
 
-export default function TaskEditModal({ task, open, people, initialPersonId, initialDate, onClose, onSaved, onUnscheduled }: Props) {
+export default function TaskEditModal({ task, open, initialPersonId, initialDate, onClose, onSaved, onUnscheduled }: Props) {
+
+  const { people, sampleTestsByGroup } = useContext(CalendarContext);
+
+
+  const testNames = task && task.sample_test_group_id ? uniqueField(sampleTestsByGroup.get(task?.sample_test_group_id) ?? [], 'test_name') : []
+  const projects = task && task.sample_test_group_id ? uniqueField(sampleTestsByGroup.get(task?.sample_test_group_id) ?? [], 'project') : []
+  const methods = task && task.sample_test_group_id ? uniqueField(sampleTestsByGroup.get(task?.sample_test_group_id) ?? [], 'method') : []
+
   const [formErrorModal, setFormErrorModal] = useState<string | null>(null)
 
   const isCreate = task === null;
@@ -193,6 +202,23 @@ export default function TaskEditModal({ task, open, people, initialPersonId, ini
               <div className="grid grid-cols-[120px_1fr] items-center gap-2">
                 <Label>Test Name</Label>
                 <Input value={form.test_name} onChange={e => set('test_name', e.target.value)} />
+              </div>            
+            </>
+          )}
+
+          {!isAdHoc(form) && (
+            <>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                <Label>Project</Label>
+                <span className="text-sm">{projects.join(', ') || '—'}</span>
+              </div>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                <Label>Method</Label>
+                <span className="text-sm">{methods.join(', ') || '—'}</span>
+              </div>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-2">
+                <Label>Test Name</Label>
+                <span className="text-sm">{testNames.join(', ') || '—'}</span>
               </div>            
             </>
           )}

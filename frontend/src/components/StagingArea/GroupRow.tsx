@@ -36,7 +36,7 @@ const TEST_COLS: { label: string; field: TestSortField }[] = [
   { label: 'Status',           field: 'status'         },
 ];
 
-const TASK_COLS = ['Name', 'Type', 'Equipment', 'Scheduled Date'] as const;
+const TASK_COLS = ['Name', 'Type', 'Equipment', 'Scheduled Date', 'Person'] as const;
 
 interface Props {
   group: SampleTestGroup;
@@ -47,7 +47,7 @@ interface Props {
 }
 
 export default function GroupRow({ group, inGroup, expanded, onToggle, searchQuery }: Props) {
-  const { selectedTestsToAdd, handleAdd, handleRemove, handleDeleteGroup, handleUnschedule, adding } =
+  const { selectedTestsToAdd, handleAdd, handleRemove, handleDeleteGroup, handleUnschedule, adding, people } =
     useContext(StagingAreaContext);
 
   const [dialog, setDialog] = useState<DialogState>(null);
@@ -304,6 +304,10 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
                     </thead>
                     <tbody>
                       {group.tasks.map(task => {
+                        const currPerson = people.find(p => p.id === task.person_id)
+                        const personName = currPerson ? `${currPerson.first_name} ${currPerson.last_name}` : null
+
+
                         const dimmed =
                           searchQuery &&
                           !(task.name ?? '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -320,6 +324,10 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
                                 <span className="unscheduled-pill">Unscheduled</span>
                               )}
                             </td>
+                            <td>
+                              {currPerson ? personName : <span className="unscheduled-pill">Unassigned</span>}
+                            </td>
+                       
                             <td>
                               {task.scheduled_date && (
                                 <button

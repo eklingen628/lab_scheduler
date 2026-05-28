@@ -1,5 +1,5 @@
 from app.db import Base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.models.template_documents import template_documents
 
@@ -12,3 +12,4 @@ class Template(Base):
     template_tasks = relationship("TemplateTask", back_populates="template", cascade="all, delete-orphan")
     test_name_aliases = relationship("TemplateTestNameAlias", back_populates="template", cascade="all, delete-orphan")
     documents = relationship("Document", secondary=template_documents)
+    is_standard = Column(Boolean, default=False, nullable=False)

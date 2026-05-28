@@ -76,7 +76,7 @@ function TestGroupRow({ groupId, sampleTests, testNames, projects, clients, spec
                     <ContextMenuContent>
                       <ContextMenuItem onClick={() => onEditTask(task)}>Edit</ContextMenuItem>
                       {task.person_id && task.scheduled_date && (
-                        <ContextMenuItem onClick={() => goToPersonDate(task.person_id!, task.scheduled_date!)}>Go To Current</ContextMenuItem>
+                        <ContextMenuItem onClick={() => goToPersonDate(task.person_id!, task.scheduled_date!)}>View on Calendar</ContextMenuItem>
                       )}
                     </ContextMenuContent>
                   </ContextMenu>

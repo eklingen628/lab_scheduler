@@ -1,10 +1,11 @@
 import { createContext } from "react";
-import type { SampleTest, SampleTestGroup } from "../types";
+import type { Person, SampleTest, SampleTestGroup } from "../types";
 
 export const StagingAreaContext = createContext({
 
     tests: [] as SampleTest[],
     groups: [] as SampleTestGroup[],
+    people: [] as Person[],
     selectedTestsToAdd: new Set<number>(),
     adding: false,
     showModal: false,

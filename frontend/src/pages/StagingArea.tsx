@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { get, post, del, patch } from '../api';
-import type { SampleTest, SampleTestGroup } from '../components/types';
+import type { Person, SampleTest, SampleTestGroup } from '../components/types';
 import CreateGroupModal from '../components/StagingArea/CreateGroupModal';
 import GroupsPane from '@/components/StagingArea/GroupsPane';
 import UnassignedPane from '@/components/StagingArea/UnassignedPane';
@@ -20,6 +20,7 @@ export default function StagingArea() {
   const [error, setError]           = useState(false);
   const [selectedTestsToAdd, setSelectedTestsToAdd] = useState<Set<number>>(new Set());
   const [adding, setAdding] = useState(false);
+  const [people, setPeople] = useState<Person[]>([]);
 
   const [viewMode, setViewMode] = usePersistedState<ViewMode>(
     'testScheduler.viewMode', 'side-by-side'
@@ -35,12 +36,14 @@ export default function StagingArea() {
 
   async function fetchData() {
     try {
-      const [testsData, groupsData] = await Promise.all([
+      const [testsData, groupsData, peopleData] = await Promise.all([
         get('/sample-tests'),
         get('/sample-test-groups/with-tasks'),
+        get('/people'),
       ]);
       setTests(testsData);
       setGroups(groupsData);
+      setPeople(peopleData);
     } catch {
       setError(true);
     } finally {
@@ -114,9 +117,23 @@ export default function StagingArea() {
 
   return (
     <StagingAreaContext.Provider value={{
-      tests, groups, selectedTestsToAdd, adding, showModal, loading, error,
-      refresh, toggleSelect, handleAdd, handleRemove, handleDeleteGroup,
-      handleUnschedule, handleCreateGroupWithTests, setShowModal, setSelectedTestsToAdd,
+      tests, 
+      groups, 
+      selectedTestsToAdd, 
+      adding, 
+      showModal, 
+      loading, 
+      error,
+      people,
+      refresh, 
+      toggleSelect, 
+      handleAdd, 
+      handleRemove, 
+      handleDeleteGroup,
+      handleUnschedule, 
+      handleCreateGroupWithTests, 
+      setShowModal, 
+      setSelectedTestsToAdd, 
     }}>
       <div className="staging-page">
         <Toolbar viewMode={viewMode} setViewMode={setViewMode} />

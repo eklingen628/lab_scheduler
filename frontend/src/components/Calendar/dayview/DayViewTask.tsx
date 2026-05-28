@@ -1,7 +1,7 @@
 import { GripVertical } from 'lucide-react';
-import type { SampleTest, Task } from '../types';
-import './Calendar.css';
-import { uniqueField } from '../utils';
+import type { SampleTest, Task } from '../../types';
+import '../Calendar.css';
+import { uniqueField } from '../../utils';
 
 interface Props {
   task: Task;

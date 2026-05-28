@@ -1,5 +1,5 @@
-import type { Task } from '../types';
-import './Calendar.css';
+import type { Task } from '../../types';
+import '../Calendar.css';
 
 interface Props {
   task: Task;

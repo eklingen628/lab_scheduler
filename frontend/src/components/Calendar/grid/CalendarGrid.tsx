@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import CalendarCell from './CalendarCell';
 import { ListFilter } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarContext } from './CalendarContext';
+import { CalendarContext } from '../context/CalendarContext';
 
 
 function formatHeader(iso: string): string {

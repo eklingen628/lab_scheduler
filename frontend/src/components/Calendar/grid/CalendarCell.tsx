@@ -1,9 +1,10 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import type { Person, Task } from '../types';
-import SortableTaskChip from './SortableTaskChip';
+import type { Person, Task } from '../../types';
+import SortableTaskChip from '../chips/SortableTaskChip';
 import { memo, useContext } from 'react';
-import { CalendarContext } from './CalendarContext';
+import { CalendarContext } from '../context/CalendarContext';
+
 
 interface Props {
   person: Person;

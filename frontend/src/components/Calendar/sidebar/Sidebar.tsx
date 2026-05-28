@@ -1,9 +1,9 @@
 import { useDroppable } from '@dnd-kit/core';
 import TestGroupRow from './TestGroupRow';
-import type { SampleTestGroup } from '../types';
+import type { SampleTestGroup } from '../../types';
 import './Sidebar.css';
 import { memo } from 'react';
-import { uniqueField } from '../utils';
+import { uniqueField } from '../../utils';
 
 interface Props {
   scheduledOverrides: Map<number, boolean>;

@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
-import type { Task } from '../types';
-import { post, patch } from '../../api';
+import type { Task } from '../../types';
+import { post, patch } from '../../../api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { uniqueField } from '../utils';
-import { CalendarContext } from './CalendarContext';
+import { uniqueField } from '../../utils';
+import { CalendarContext } from '../context/CalendarContext';
 
 interface Props {
   task: Task | null;

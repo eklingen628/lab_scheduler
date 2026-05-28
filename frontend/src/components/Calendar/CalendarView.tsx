@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import CalendarGrid from './CalendarGrid';
-import { CalendarContext } from './CalendarContext';
+import CalendarGrid from './grid/CalendarGrid';
+import { CalendarContext } from './context/CalendarContext';
 import './Calendar.css';
 
 interface Props {

@@ -1,11 +1,11 @@
 import { useContext, memo } from 'react';
 import TestGroupBubble from './TestGroupBubble';
-import DraggableTaskChip from '../Calendar/DraggableTaskChip';
-import TaskChip from '../Calendar/TaskChip';
-import type { SampleTest, Task } from '../types';
+import type { SampleTest, Task } from '../../types';
 import './Sidebar.css';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { CalendarContext } from '../Calendar/CalendarContext';
+import { CalendarContext } from '../context/CalendarContext';
+import DraggableTaskChip from '../chips/DraggableTaskChip';
+import TaskChip from '../chips/TaskChip';
 
 interface Props {
   groupId: number;

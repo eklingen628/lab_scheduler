@@ -2,11 +2,12 @@ import { useContext } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { X } from 'lucide-react';
-import type { Task, SampleTest } from '../types';
+import type { Task, SampleTest } from '../../types'
 import SortableDayViewTask from './SortableDayViewTask';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { CalendarContext } from './CalendarContext';
+import { CalendarContext } from '../context/CalendarContext';
+
 
 interface Props {
   sampleTestsByGroup: Map<number, SampleTest[]>;

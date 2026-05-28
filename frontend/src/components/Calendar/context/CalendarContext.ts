@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Person, SampleTest, Task } from "../types";
+import type { Person, SampleTest, Task } from "../../types";
 
 export const CalendarContext = createContext({
   // ── Week data ────────────────────────────────────────────────────────────────

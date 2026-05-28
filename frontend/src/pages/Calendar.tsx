@@ -4,13 +4,13 @@ import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection, M
 import { arrayMove } from '@dnd-kit/sortable';
 import type { Person, Task, SampleTest, SampleTestGroup } from '../components/types';
 import CalendarView from '../components/Calendar/CalendarView';
-import TaskChip from '../components/Calendar/TaskChip';
-import DayViewTask from '../components/Calendar/DayViewTask';
-import Sidebar from '../components/SideBar/Sidebar';
+import TaskChip from '@/components/Calendar/chips/TaskChip';
+import DayViewTask from '@/components/Calendar/dayview/DayViewTask';
+import Sidebar from '../components/Calendar/sidebar/Sidebar';
 import { get, patch } from '../api';
-import DayView from '@/components/Calendar/DayView';
-import TaskEditModal from '@/components/Calendar/TaskEditModal';
-import { CalendarContext } from '@/components/Calendar/CalendarContext';
+import DayView from '@/components/Calendar/dayview/DayView';
+import TaskEditModal from '@/components/Calendar/modals/TaskEditModal';
+import { CalendarContext } from '@/components/Calendar/context/CalendarContext';
 
 
 

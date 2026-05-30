@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { get, post, del, patch } from '../api';
-import type { Person, SampleTest, SampleTestGroup } from '../components/types';
+import { get, post, del, unscheduleTask } from '../api';
+import type { Person, SampleTest, SampleTestGroup, Task } from '../components/types';
 import CreateGroupModal from '../components/StagingArea/CreateGroupModal';
+import TaskEditModal from '@/components/Calendar/modals/TaskEditModal';
+import { TaskEditContext } from '@/components/Calendar/context/TaskEditContext';
 import GroupsPane from '@/components/StagingArea/GroupsPane';
 import UnassignedPane from '@/components/StagingArea/UnassignedPane';
 import Toolbar from '@/components/StagingArea/Toolbar';
@@ -21,6 +23,7 @@ export default function StagingArea() {
   const [selectedTestsToAdd, setSelectedTestsToAdd] = useState<Set<number>>(new Set());
   const [adding, setAdding] = useState(false);
   const [people, setPeople] = useState<Person[]>([]);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const [viewMode, setViewMode] = usePersistedState<ViewMode>(
     'testScheduler.viewMode', 'side-by-side'
@@ -105,7 +108,7 @@ export default function StagingArea() {
   }
 
   async function handleUnschedule(taskId: number) {
-    await patch(`/tasks/${taskId}`, { scheduled_date: null });
+    await unscheduleTask(taskId)
     await refresh();
   }
 
@@ -133,7 +136,9 @@ export default function StagingArea() {
       handleUnschedule, 
       handleCreateGroupWithTests, 
       setShowModal, 
-      setSelectedTestsToAdd, 
+      setSelectedTestsToAdd,
+      editingTask, 
+      setEditingTask, 
     }}>
       <div className="staging-page">
         <Toolbar viewMode={viewMode} setViewMode={setViewMode} />
@@ -147,6 +152,18 @@ export default function StagingArea() {
           <GroupsPane />
         </SplitContainer>
         {showModal && <CreateGroupModal />}
+        <TaskEditContext.Provider value={{
+          people,
+          sampleTestsByGroup: new Map(groups.map(g => [g.id, g.sample_tests])),
+        }}>
+          <TaskEditModal
+            task={editingTask}
+            open={editingTask !== null}
+            onClose={() => setEditingTask(null)}
+            onSaved={() => { setEditingTask(null); refresh(); }}
+            onUnscheduled={() => { setEditingTask(null); refresh(); }}
+          />
+        </TaskEditContext.Provider>
       </div>
     </StagingAreaContext.Provider>
   );

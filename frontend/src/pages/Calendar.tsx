@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { DndContext, DragOverlay, closestCenter, pointerWithin } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection, Modifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -11,30 +11,13 @@ import { get, patch } from '../api';
 import DayView from '@/components/Calendar/dayview/DayView';
 import TaskEditModal from '@/components/Calendar/modals/TaskEditModal';
 import { CalendarContext } from '@/components/Calendar/context/CalendarContext';
+import { TaskEditContext } from '@/components/Calendar/context/TaskEditContext';
+import { getMonday, getWeekDates } from '@/components/utils';
+import { useSearchParams } from 'react-router';
 
 
 
-function localDateStr(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
 
-function getMonday(d: Date): Date {
-  const day = d.getDay();
-  const monday = new Date(d);
-  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-  return monday
-}
-
-function getWeekDates(monday: Date, offset = 0): string[] {
-  const start = new Date(monday)
-  start.setDate(start.getDate() + offset * 7);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    return localDateStr(d);
-  });
-}
 
 function computePositions(tasks: Task[]): Map<number, number> {
   const counters = new Map<string, number>();
@@ -93,7 +76,19 @@ export default function Calendar() {
   const [personSort, setPersonSort] = useState<'asc' | 'desc' | null>(null)
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
 
-  
+  const [searchParams, setSearchParams] = useSearchParams()
+  const searchParamPerson = searchParams.get('person');
+  const searchParamDate = searchParams.get('date');
+  const handledSearchParams = useRef(false);
+
+  useEffect(() => {
+    if (!handledSearchParams.current && searchParamPerson && searchParamDate && people.length > 0) {
+      handledSearchParams.current = true;
+      goToPersonDate(Number(searchParamPerson), searchParamDate);
+      setSearchParams({}, { replace: true })
+    }
+  }, [people]);
+
 
 
   async function fetchGroups() {
@@ -361,11 +356,17 @@ export default function Calendar() {
     setEditingTask(null);
   }
 
-  function handleSavedTask(saved: Task) {
-    setTasks(prev => {
-      const idx = prev.findIndex(t => t.id === saved.id);
-      return idx !== -1 ? prev.map(t => t.id === saved.id ? saved : t) : [...prev, saved];
-    });
+  async function handleSavedTask(saved: Task) {
+    const updatedTasks = tasks.findIndex(t => t.id === saved.id) !== -1
+      ? tasks.map(t => t.id === saved.id ? saved : t)
+      : [...tasks, saved];
+    setTasks(updatedTasks);
+
+    if (saved.person_id && saved.scheduled_date) {
+      const cellTasks = updatedTasks.filter(t => t.person_id === saved.person_id && t.scheduled_date === saved.scheduled_date);
+      const positions = computePositions(cellTasks);
+      await Promise.all(cellTasks.map(t => patch(`/tasks/${t.id}`, { position: positions.get(t.id) })));
+    }
     fetchGroups();
     closeModal();
   }
@@ -440,7 +441,6 @@ export default function Calendar() {
           />
           <DayView
             sampleTestsByGroup={sampleTestsByGroup}
-            onEditTask={openEditModal}
             onAddTask={openCreateModal}
           />
           <DragOverlay dropAnimation={null}>
@@ -451,15 +451,17 @@ export default function Calendar() {
               : null}
           </DragOverlay>
         </DndContext>
-        <TaskEditModal
-          task={editingTask}
-          open={modalOpen}
-          initialPersonId={dayViewPerson?.id ?? null}
-          initialDate={dayViewDate}
-          onClose={closeModal}
-          onSaved={handleSavedTask}
-          onUnscheduled={handleUnscheduledTask}
-        />
+        <TaskEditContext.Provider value={{ people, sampleTestsByGroup }}>
+          <TaskEditModal
+            task={editingTask}
+            open={modalOpen}
+            initialPersonId={dayViewPerson?.id ?? null}
+            initialDate={dayViewDate}
+            onClose={closeModal}
+            onSaved={handleSavedTask}
+            onUnscheduled={handleUnscheduledTask}
+          />
+        </TaskEditContext.Provider>
       </div>
     </CalendarContext.Provider>
   );

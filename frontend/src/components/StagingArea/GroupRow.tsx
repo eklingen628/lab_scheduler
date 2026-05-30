@@ -1,6 +1,8 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import type { SampleTest, SampleTestGroup } from '../types';
 import { StagingAreaContext } from './StangingAreaContext';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { useNavigate } from 'react-router';
 
 type ScheduleStatus = 'full' | 'partial' | 'none';
 
@@ -47,7 +49,7 @@ interface Props {
 }
 
 export default function GroupRow({ group, inGroup, expanded, onToggle, searchQuery }: Props) {
-  const { selectedTestsToAdd, handleAdd, handleRemove, handleDeleteGroup, handleUnschedule, adding, people } =
+  const { selectedTestsToAdd, handleAdd, handleRemove, handleDeleteGroup, handleUnschedule, adding, people, setEditingTask } =
     useContext(StagingAreaContext);
 
   const [dialog, setDialog] = useState<DialogState>(null);
@@ -61,6 +63,8 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
   const count = selectedTestsToAdd.size;
   const status = getStatus(group);
   const hasScheduled = group.tasks.some(t => t.scheduled_date !== null);
+
+  const goToCalendar = useNavigate();
 
   useEffect(() => {
     if (expanded) {
@@ -130,11 +134,6 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <p style={{ margin: '0 0 20px', fontSize: '0.9rem', color: '#333' }}>{dialog.message}</p>
             <div className="modal-actions">
-              {dialog.kind === 'confirm' && (
-                <button className="modal-btn modal-btn--cancel" onClick={() => setDialog(null)}>
-                  Cancel
-                </button>
-              )}
               <button
                 className="modal-btn modal-btn--confirm"
                 onClick={() => {
@@ -144,6 +143,12 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
               >
                 OK
               </button>
+              {dialog.kind === 'confirm' && (
+                <button className="modal-btn modal-btn--cancel" onClick={() => setDialog(null)}>
+                  Cancel
+                </button>
+              )}
+
             </div>
           </div>
         </div>
@@ -185,7 +190,7 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
                       setShowMenu(false);
                       setDialog({
                         kind: 'confirm',
-                        message: `Delete Group ${group.id} and release its tests back to the pool?`,
+                        message: `Delete Group ${group.id} and unassign its tests?`,
                         onConfirm: () => handleDeleteGroup(group.id),
                       });
                     }}
@@ -274,11 +279,17 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
                                     onConfirm: () => handleDeleteGroup(group.id),
                                   });
                                 } else {
-                                  handleRemove(test.id);
+                                  setDialog({
+                                    kind: 'confirm',
+                                    message: `Are you sure you want to remove this test from the group?`,
+                                    onConfirm: () => handleRemove(test.id),
+                                  });
+                                  
+                                
                                 }
                               }}
                             >
-                              Remove
+                              Remove From Group
                             </button>
                           </td>
                         </tr>
@@ -306,39 +317,46 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
                       {group.tasks.map(task => {
                         const currPerson = people.find(p => p.id === task.person_id)
                         const personName = currPerson ? `${currPerson.first_name} ${currPerson.last_name}` : null
-
-
-                        const dimmed =
-                          searchQuery &&
-                          !(task.name ?? '').toLowerCase().includes(searchQuery.toLowerCase());
                         return (
-                          <tr
-                            key={task.id}
-                            className={dimmed ? 'task-row--dimmed' : ''}
-                          >
-                            <td>{task.name}</td>
-                            <td>{task.type ?? '—'}</td>
-                            <td>{task.equipment ?? '—'}</td>
-                            <td>
-                              {task.scheduled_date ?? (
-                                <span className="unscheduled-pill">Unscheduled</span>
-                              )}
-                            </td>
-                            <td>
-                              {currPerson ? personName : <span className="unscheduled-pill">Unassigned</span>}
-                            </td>
-                       
-                            <td>
-                              {task.scheduled_date && (
-                                <button
-                                  className="outline-btn"
-                                  onClick={() => handleUnschedule(task.id)}
-                                >
-                                  Remove from schedule
-                                </button>
-                              )}
-                            </td>
-                          </tr>
+                        <ContextMenu>
+                          <ContextMenuTrigger asChild>
+                            <tr key={task.id}>
+                              <td>{task.name}</td>
+                              <td>{task.type ?? '—'}</td>
+                              <td>{task.equipment ?? '—'}</td>
+                              <td>
+                                {task.scheduled_date ?? (
+                                  <span className="unscheduled-pill">Unscheduled</span>
+                                )}
+                              </td>
+                              <td>
+                                {currPerson ? personName : <span className="unscheduled-pill">Unassigned</span>}
+                              </td>
+                              <td>
+                                {task.scheduled_date && (
+                                  <button
+                                    className="outline-btn"
+                                    onClick={() => {
+                                      setDialog({
+                                        kind: 'confirm',
+                                        message: `Are you sure you want to remove this task from the schedule?`,
+                                        onConfirm: () => handleUnschedule(task.id),
+                                      });
+                                    }}                                    
+                                  >
+                                    Unschedule
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem onClick={() => setEditingTask(task)}>Edit</ContextMenuItem>
+                            {task.person_id && task.scheduled_date && (
+                              <ContextMenuItem onClick={() => goToCalendar(`/calendar?person=${task.person_id!}&date=${task.scheduled_date!}`)}>View on Calendar</ContextMenuItem>
+                            )}
+                          </ContextMenuContent>
+                        </ContextMenu>
                         );
                       })}
                     </tbody>

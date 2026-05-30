@@ -5,7 +5,9 @@ import StagingArea from './pages/StagingArea';
 import Templates from './pages/Templates';
 import TemplateNew from './pages/TemplateNew';
 import TemplateDetail from './pages/TemplateDetail';
+import TimeReport from './pages/TimeReport';
 import './App.css';
+
 
 export default function App() {
   return (
@@ -19,6 +21,7 @@ export default function App() {
           <Route path="/templates" element={<Templates />} />
           <Route path="/templates/new" element={<TemplateNew />} />
           <Route path="/templates/:id" element={<TemplateDetail />} />
+          <Route path="/timereport" element={<TimeReport />} />
         </Routes>
       </main>
     </div>

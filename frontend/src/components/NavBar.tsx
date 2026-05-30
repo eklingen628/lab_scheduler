@@ -27,6 +27,7 @@ export default function NavBar() {
           <li><NavLink to="/calendar" onClick={() => setOpen(false)}>Calendar</NavLink></li>
           <li><NavLink to="/staging" onClick={() => setOpen(false)}>Staging Area</NavLink></li>
           <li><NavLink to="/templates" onClick={() => setOpen(false)}>Templates</NavLink></li>
+          <li><NavLink to="/timereport" onClick={() => setOpen(false)}>Time Report</NavLink></li>
         </ul>
       )}
     </nav>

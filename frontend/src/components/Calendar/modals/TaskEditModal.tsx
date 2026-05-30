@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
 import type { Task } from '../../types';
-import { post, patch } from '../../../api';
+import { post, patch, del, unscheduleTask } from '../../../api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { uniqueField } from '../../utils';
-import { CalendarContext } from '../context/CalendarContext';
+import { TaskEditContext } from '../context/TaskEditContext';
 
 interface Props {
   task: Task | null;
@@ -95,7 +95,7 @@ function isAdHoc(f: AdHocTaskFormState | GroupedTaskFormState): f is AdHocTaskFo
 
 export default function TaskEditModal({ task, open, initialPersonId, initialDate, onClose, onSaved, onUnscheduled }: Props) {
 
-  const { people, sampleTestsByGroup } = useContext(CalendarContext);
+  const { people, sampleTestsByGroup } = useContext(TaskEditContext);
 
 
   const testNames = task && task.sample_test_group_id ? uniqueField(sampleTestsByGroup.get(task?.sample_test_group_id) ?? [], 'test_name') : []
@@ -125,9 +125,14 @@ export default function TaskEditModal({ task, open, initialPersonId, initialDate
   }
 
   async function handleSave() {
-    console.log(form.scheduled_date)
+    // ad-hoc tasks must have both person and date — no group to fall back on
     if ((!task || !task.sample_test_group_id) && (!form.person_id || !form.scheduled_date)) {
-      setFormErrorModal("The task is missing a person and/or scheduled date. These cannot be blank.")
+      setFormErrorModal("The ad hoc task is missing a person and/or scheduled date. These cannot be blank for ad hoc tasks.")
+      return
+    }
+    // any task can't be half-scheduled
+    if ((!form.person_id) !== (!form.scheduled_date)) {
+      setFormErrorModal("A task must have both a person and a scheduled date, or neither." )
       return
     }
 
@@ -162,7 +167,11 @@ export default function TaskEditModal({ task, open, initialPersonId, initialDate
     if (!task) return;
     setSaving(true);
     try {
-      await patch(`/tasks/${task.id}`, { person_id: null, scheduled_date: null, position: null });
+      if (!task.sample_test_group_id) {
+        await del(`/tasks/${task.id}`);
+      } else {
+        await unscheduleTask(task.id);
+      }
       onUnscheduled(task.id);
     } finally {
       setSaving(false);
@@ -258,7 +267,7 @@ export default function TaskEditModal({ task, open, initialPersonId, initialDate
         <DialogFooter className="flex justify-between">
           {!isCreate && (
             <Button variant="destructive" onClick={handleUnschedule} disabled={saving || !task?.scheduled_date}>
-              Unschedule
+              {task && !task.sample_test_group_id ? 'Delete' : 'Unschedule'}
             </Button>
           )}
           <div className="flex gap-2 ml-auto">

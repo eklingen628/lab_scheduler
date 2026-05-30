@@ -64,3 +64,7 @@ export async function patch(input: string, body: Record<string, unknown>) {
 }
 
 
+
+export async function unscheduleTask(taskId: number) {
+    await patch(`/tasks/${taskId}`, { person_id: null, scheduled_date: null, position: null });
+}

@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Person, SampleTest, SampleTestGroup } from "../types";
+import type { Person, SampleTest, SampleTestGroup, Task } from "../types";
 
 export const StagingAreaContext = createContext({
 
@@ -11,6 +11,8 @@ export const StagingAreaContext = createContext({
     showModal: false,
     loading: false,
     error: false,
+    editingTask: null as Task | null,
+    setEditingTask: (_: Task | null) => {},
 
 
     refresh: async () => {},

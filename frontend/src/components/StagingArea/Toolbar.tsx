@@ -1,25 +1,25 @@
-type ViewMode = 'side-by-side' | 'stacked';
+type PaneMode = 'grouped' | 'flat';
 
 interface Props {
-  viewMode: ViewMode;
-  setViewMode: (v: ViewMode) => void;
+  paneMode: PaneMode;
+  setPaneMode: (v: PaneMode) => void;
 }
 
-export default function Toolbar({ viewMode, setViewMode }: Props) {
+export default function Toolbar({ paneMode, setPaneMode }: Props) {
   return (
     <div className="staging-toolbar">
       <div className="staging-view-switcher">
         <button
-          className={`view-btn${viewMode === 'side-by-side' ? ' view-btn--active' : ''}`}
-          onClick={() => setViewMode('side-by-side')}
+          className={`view-btn${paneMode === 'grouped' ? ' view-btn--active' : ''}`}
+          onClick={() => setPaneMode('grouped')}
         >
-          Side by side
+          Grouped
         </button>
         <button
-          className={`view-btn${viewMode === 'stacked' ? ' view-btn--active' : ''}`}
-          onClick={() => setViewMode('stacked')}
+          className={`view-btn${paneMode === 'flat' ? ' view-btn--active' : ''}`}
+          onClick={() => setPaneMode('flat')}
         >
-          Stacked
+          Flat
         </button>
       </div>
     </div>

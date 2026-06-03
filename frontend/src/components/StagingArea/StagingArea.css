@@ -45,6 +45,31 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
+/* ─── Main layout ────────────────────────────────────────── */
+
+.staging-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.staging-layout__collapsed-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  flex-shrink: 0;
+  background: #f5f5f5;
+  border-right: 1px solid #d0d0d0;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 0.75rem;
+  color: #888;
+  padding: 12px 0;
+  user-select: none;
+}
+
 /* ─── Split container ────────────────────────────────────── */
 
 .split-container {
@@ -93,6 +118,8 @@
 .pane {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
   height: 100%;
   overflow: hidden;
   background: #f7f8fa;
@@ -214,6 +241,10 @@
   overflow-y: auto;
   min-height: 0;
   padding-bottom: 300px;
+}
+
+.pane-body--flat {
+  padding-bottom: 16px;
 }
 
 .pane-table-wrapper {
@@ -629,13 +660,6 @@
 
 /* ─── Legacy layout (kept for reference) ────────────────── */
 
-.staging-layout {
-  display: flex;
-  height: 100%;
-  overflow: hidden;
-  font-family: sans-serif;
-}
-
 /* Left panel — test pool */
 
 .staging-pool {
@@ -777,6 +801,7 @@
 .sortable-th {
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 }
 
 .sortable-th:hover {
@@ -924,6 +949,12 @@
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.staging-table th:first-child {
+  width: 36px;
+  padding: 7px 6px;
+  text-align: center;
 }
 
 .staging-table td {
@@ -1113,4 +1144,32 @@
 .modal-btn--confirm:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* ─── Flat tests table ───────────────────────────────────── */
+
+.flat-tests-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.flat-tests-table th,
+.flat-tests-table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.flat-tests-table thead th {
+  background: #f5f5f5;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.flat-tests-table thead th:hover {
+  background: #ebebeb;
 }

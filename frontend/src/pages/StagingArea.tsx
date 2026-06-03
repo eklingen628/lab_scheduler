@@ -5,6 +5,7 @@ import CreateGroupModal from '../components/StagingArea/CreateGroupModal';
 import TaskEditModal from '@/components/Calendar/modals/TaskEditModal';
 import { TaskEditContext } from '@/components/Calendar/context/TaskEditContext';
 import GroupsPane from '@/components/StagingArea/GroupsPane';
+import FlatTestsPane from '@/components/StagingArea/FlatTestsPane';
 import UnassignedPane from '@/components/StagingArea/UnassignedPane';
 import Toolbar from '@/components/StagingArea/Toolbar';
 import SplitContainer from '@/components/StagingArea/SplitContainer';
@@ -12,7 +13,7 @@ import { usePersistedState } from '@/components/StagingArea/usePersistedState';
 import '../components/StagingArea/StagingArea.css';
 import { StagingAreaContext } from '@/components/StagingArea/StangingAreaContext';
 
-type ViewMode = 'side-by-side' | 'stacked';
+type PaneMode = 'grouped' | 'flat';
 
 export default function StagingArea() {
   const [tests, setTests]   = useState<SampleTest[]>([]);
@@ -25,14 +26,11 @@ export default function StagingArea() {
   const [people, setPeople] = useState<Person[]>([]);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const [viewMode, setViewMode] = usePersistedState<ViewMode>(
-    'testScheduler.viewMode', 'side-by-side'
+  const [paneMode, setPaneMode] = usePersistedState<PaneMode>(
+    'testScheduler.paneMode', 'grouped'
   );
-  const [sideBySideRatio, setSideBySideRatio] = usePersistedState(
-    'testScheduler.splitRatio.sideBySide', 0.5
-  );
-  const [stackedRatio, setStackedRatio] = usePersistedState(
-    'testScheduler.splitRatio.stacked', 0.5
+  const [splitRatio, setSplitRatio] = usePersistedState(
+    'testScheduler.splitRatio', 0.5
   );
 
   useEffect(() => { fetchData(); }, []);
@@ -115,42 +113,47 @@ export default function StagingArea() {
   if (loading) return <div className="staging-page" style={{ padding: '2rem' }}>Loading...</div>;
   if (error)   return <div className="staging-page" style={{ padding: '2rem' }}>Failed to load data.</div>;
 
-  const ratio    = viewMode === 'side-by-side' ? sideBySideRatio : stackedRatio;
-  const setRatio = viewMode === 'side-by-side' ? setSideBySideRatio : setStackedRatio;
-
   return (
     <StagingAreaContext.Provider value={{
-      tests, 
-      groups, 
-      selectedTestsToAdd, 
-      adding, 
-      showModal, 
-      loading, 
+      tests,
+      groups,
+      selectedTestsToAdd,
+      adding,
+      showModal,
+      loading,
       error,
       people,
-      refresh, 
-      toggleSelect, 
-      handleAdd, 
-      handleRemove, 
+      refresh,
+      toggleSelect,
+      handleAdd,
+      handleRemove,
       handleDeleteGroup,
-      handleUnschedule, 
-      handleCreateGroupWithTests, 
-      setShowModal, 
+      handleUnschedule,
+      handleCreateGroupWithTests,
+      setShowModal,
       setSelectedTestsToAdd,
-      editingTask, 
-      setEditingTask, 
+      editingTask,
+      setEditingTask,
     }}>
       <div className="staging-page">
-        <Toolbar viewMode={viewMode} setViewMode={setViewMode} />
-        <SplitContainer
-          orientation={viewMode === 'side-by-side' ? 'horizontal' : 'vertical'}
-          ratio={ratio}
-          onRatioChange={setRatio}
-          reverseOrder={viewMode === 'stacked'}
-        >
-          <UnassignedPane />
-          <GroupsPane />
-        </SplitContainer>
+        <Toolbar paneMode={paneMode} setPaneMode={setPaneMode} />
+        {paneMode === 'grouped' ? (
+          <SplitContainer
+            orientation="horizontal"
+            ratio={splitRatio}
+            onRatioChange={setSplitRatio}
+          >
+            <UnassignedPane />
+            <GroupsPane />
+          </SplitContainer>
+        ) : (
+          <div className="staging-layout">
+            <div className="staging-layout__collapsed-strip">
+              <span>Switch to Grouped view to add tests</span>
+            </div>
+            <FlatTestsPane />
+          </div>
+        )}
         {showModal && <CreateGroupModal />}
         <TaskEditContext.Provider value={{
           people,

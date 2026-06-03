@@ -26,17 +26,26 @@ type DialogState =
   | { kind: 'confirm'; message: string; onConfirm: () => void }
   | null;
 
-type TestSortField = 'sample_id' | 'test_name' | 'project' | 'available_date' | 'due_date' | 'status';
+type TestSortField = 'sample_id' | 'test_name' | 'project' | 'available_date' | 'due_date' | 'status' | 'actual_start_date';
 type SortDir = 'asc' | 'desc';
 
 const TEST_COLS: { label: string; field: TestSortField }[] = [
-  { label: 'Sample ID',        field: 'sample_id'      },
-  { label: 'Test Name',        field: 'test_name'      },
-  { label: 'Project',          field: 'project'        },
-  { label: 'Available Date',   field: 'available_date' },
-  { label: 'Due Date',         field: 'due_date'       },
-  { label: 'Status',           field: 'status'         },
+  { label: 'Sample ID',        field: 'sample_id'         },
+  { label: 'Test Name',        field: 'test_name'         },
+  { label: 'Project',          field: 'project'           },
+  { label: 'Available Date',   field: 'available_date'    },
+  { label: 'Due Date',         field: 'due_date'          },
+  { label: 'Status',           field: 'status'            },
+  { label: 'Start Date',       field: 'actual_start_date' },
 ];
+
+function daysInProgress(startDate: string | null, status: string | null): number | null {
+  if (!startDate || status === 'Complete') return null;
+  const start = new Date(startDate + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.floor((today.getTime() - start.getTime()) / 86400000);
+}
 
 const TASK_COLS = ['Name', 'Type', 'Equipment', 'Scheduled Date', 'Person'] as const;
 
@@ -249,6 +258,7 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
                             )}
                           </th>
                         ))}
+                        <th>Days in Progress</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -261,6 +271,8 @@ export default function GroupRow({ group, inGroup, expanded, onToggle, searchQue
                           <td>{test.available_date ?? '—'}</td>
                           <td>{test.due_date ?? '—'}</td>
                           <td>{test.status ?? '—'}</td>
+                          <td>{test.actual_start_date ?? '—'}</td>
+                          <td>{daysInProgress(test.actual_start_date, test.status) ?? '—'}</td>
                           <td>
                             <button
                               className="remove-btn"

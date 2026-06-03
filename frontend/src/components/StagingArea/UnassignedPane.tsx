@@ -1,15 +1,21 @@
 import { useState, useContext, useMemo } from 'react';
 import { StagingAreaContext } from './StangingAreaContext';
-import FilterDropdown from './FilterDropdown';
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import type { SampleTest } from '../types';
 
 type SortField = 'sample_id' | 'test_name' | 'project' | 'available_date' | 'due_date' | 'status';
 type SortDir = 'asc' | 'desc';
 type Sort = { field: SortField; dir: SortDir };
 
 const COLS: { label: string; field: SortField }[] = [
+  { label: 'Project',        field: 'project'        },
   { label: 'Sample ID',      field: 'sample_id'      },
   { label: 'Test Name',      field: 'test_name'      },
-  { label: 'Project',        field: 'project'        },
   { label: 'Available Date', field: 'available_date' },
   { label: 'Due Date',       field: 'due_date'       },
   { label: 'Status',         field: 'status'         },
@@ -28,26 +34,20 @@ export default function UnassignedPane() {
     tests, selectedTestsToAdd, toggleSelect, setSelectedTestsToAdd, setShowModal,
   } = useContext(StagingAreaContext);
 
-  const [sorts, setSorts]             = useState<Sort[]>([{ field: 'due_date', dir: 'asc' }]);
-  const [search, setSearch]           = useState('');
-  const [filterStatuses, setFilterStatuses] = useState<Set<string>>(new Set());
-  const [filterProjects, setFilterProjects] = useState<Set<string>>(new Set());
+  const [sorts, setSorts] = useState<Sort[]>([{ field: 'due_date', dir: 'asc' }]);
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<Record<string, Set<string>>>({});
   const [dueDateFrom, setDueDateFrom] = useState('');
   const [dueDateTo,   setDueDateTo]   = useState('');
 
+
+
+
   const unassigned = useMemo(() => tests.filter(t => t.group_id === null), [tests]);
 
-  const allStatuses = useMemo(() => {
-    const set = new Set<string>();
-    unassigned.forEach(t => { if (t.status) set.add(t.status); });
-    return [...set].sort();
-  }, [unassigned]);
 
-  const allProjects = useMemo(() => {
-    const set = new Set<string>();
-    unassigned.forEach(t => { if (t.project) set.add(t.project); });
-    return [...set].sort();
-  }, [unassigned]);
+
+
 
   function toggleSortField(field: SortField) {
     setSorts(prev => {
@@ -64,21 +64,30 @@ export default function UnassignedPane() {
     });
   }
 
-  function toggleStatus(s: string) {
-    setFilterStatuses(prev => {
-      const next = new Set(prev);
-      if (next.has(s)) next.delete(s); else next.add(s);
+
+
+  function toggleFilter(val: string, field: string) {
+    setFilters(prev => {
+      const next = {...prev}
+      next[field] = new Set(next[field])
+      if (!next[field])
+        next[field] = new Set()
+      if (next[field].has(val)) next[field].delete(val); 
+      else next[field].add(val);
+      console.log(next)
       return next;
     });
   }
 
-  function toggleProject(p: string) {
-    setFilterProjects(prev => {
-      const next = new Set(prev);
-      if (next.has(p)) next.delete(p); else next.add(p);
+  function clearFiltersForField(field: string) {
+    setFilters(prev => {
+      const next = {...prev}
+      next[field] = new Set()
       return next;
     });
   }
+
+
 
   const visible = useMemo(() => {
     let result = unassigned;
@@ -98,11 +107,15 @@ export default function UnassignedPane() {
         (t.other_testing_documents ?? '').toLowerCase().includes(q)
       );
     }
-    if (filterStatuses.size > 0) {
-      result = result.filter(t => t.status !== null && filterStatuses.has(t.status));
-    }
-    if (filterProjects.size > 0) {
-      result = result.filter(t => t.project !== null && filterProjects.has(t.project));
+
+    if (Object.values(filters).reduce((prev, curr) => prev + curr.size, 0) > 0) {
+      Object.entries(filters).forEach(([field, filterSet])  => {
+        result = result.filter(t => {
+          const val = t[field as keyof SampleTest]
+          return val !== null && filterSet.has(String(val))
+        }) 
+      })
+
     }
     if (dueDateFrom) result = result.filter(t => t.due_date !== null && t.due_date >= dueDateFrom);
     if (dueDateTo)   result = result.filter(t => t.due_date !== null && t.due_date <= dueDateTo);
@@ -124,7 +137,25 @@ export default function UnassignedPane() {
       }
       return 0;
     });
-  }, [unassigned, search, filterStatuses, filterProjects, dueDateFrom, dueDateTo, sorts]);
+  }, [unassigned, search, filters, dueDateFrom, dueDateTo, sorts]);
+
+
+  const allUniqueVals = useMemo(() => {
+    const uniqueMap: Record<string, Set<string>> = {}
+    COLS.forEach(col => {
+      unassigned.forEach(t => {
+        const cf = col.field
+        const cv = t[cf]
+        if (!uniqueMap[cf])
+          uniqueMap[cf] = new Set<string>();
+        if (cv !== null)
+          uniqueMap[cf].add(cv)
+        })
+    })
+    return Object.fromEntries(Object.entries(uniqueMap).map(([key, val]) => [key, [...val].sort()]))
+  }, [unassigned]);
+
+
 
   const selectedCount = selectedTestsToAdd.size;
   const allVisibleSelected =
@@ -139,7 +170,7 @@ export default function UnassignedPane() {
   }
 
   const dueDateActive = !!(dueDateFrom || dueDateTo);
-  const activeFilterCount = filterStatuses.size + filterProjects.size + (dueDateActive ? 1 : 0);
+  const activeFilterCount = Object.values(filters).reduce((prev, curr) => prev + curr.size, 0) + (dueDateActive ? 1 : 0);
 
   return (
     <div className="pane">
@@ -156,87 +187,12 @@ export default function UnassignedPane() {
             + New group{selectedCount > 0 ? ` (${selectedCount})` : ''}
           </button>
 
-          {allStatuses.length > 0 && (
-            <FilterDropdown label="Status" activeCount={filterStatuses.size}>
-              {allStatuses.map(s => (
-                <label key={s} className="filter-dropdown-option">
-                  <input
-                    type="checkbox"
-                    checked={filterStatuses.has(s)}
-                    onChange={() => toggleStatus(s)}
-                  />
-                  {s}
-                </label>
-              ))}
-              {filterStatuses.size > 0 && (
-                <button
-                  className="filter-dropdown-clear"
-                  onClick={() => setFilterStatuses(new Set())}
-                >
-                  Clear
-                </button>
-              )}
-            </FilterDropdown>
-          )}
-
-          {allProjects.length > 0 && (
-            <FilterDropdown label="Project" activeCount={filterProjects.size}>
-              {allProjects.map(p => (
-                <label key={p} className="filter-dropdown-option">
-                  <input
-                    type="checkbox"
-                    checked={filterProjects.has(p)}
-                    onChange={() => toggleProject(p)}
-                  />
-                  {p}
-                </label>
-              ))}
-              {filterProjects.size > 0 && (
-                <button
-                  className="filter-dropdown-clear"
-                  onClick={() => setFilterProjects(new Set())}
-                >
-                  Clear
-                </button>
-              )}
-            </FilterDropdown>
-          )}
-
-          <FilterDropdown label="Due date" activeCount={dueDateActive ? 1 : 0}>
-            <div className="filter-dropdown-date-row">
-              <span className="pane-filter-label">From</span>
-              <input
-                type="date"
-                className="filter-dropdown-date-input"
-                value={dueDateFrom}
-                onChange={e => setDueDateFrom(e.target.value)}
-              />
-            </div>
-            <div className="filter-dropdown-date-row">
-              <span className="pane-filter-label">To</span>
-              <input
-                type="date"
-                className="filter-dropdown-date-input"
-                value={dueDateTo}
-                onChange={e => setDueDateTo(e.target.value)}
-              />
-            </div>
-            {dueDateActive && (
-              <button
-                className="filter-dropdown-clear"
-                onClick={() => { setDueDateFrom(''); setDueDateTo(''); }}
-              >
-                Clear
-              </button>
-            )}
-          </FilterDropdown>
 
           <button
             className="control-clear-btn"
             style={{ visibility: activeFilterCount > 0 ? 'visible' : 'hidden' }}
             onClick={() => {
-              setFilterStatuses(new Set());
-              setFilterProjects(new Set());
+              setFilters({});
               setDueDateFrom('');
               setDueDateTo('');
             }}
@@ -262,11 +218,9 @@ export default function UnassignedPane() {
         </div>
       </div>
 
-      <div className="pane-body">
+      <div className="pane-body pane-body--flat">
         {unassigned.length === 0 ? (
           <div className="staging-placeholder"><p>No unassigned tests.</p></div>
-        ) : visible.length === 0 ? (
-          <div className="staging-placeholder"><p>No tests match the current filters.</p></div>
         ) : (
           <div className="staging-table-wrapper pane-table-wrapper">
             <table className="staging-table">
@@ -279,31 +233,57 @@ export default function UnassignedPane() {
                       onChange={toggleAll}
                     />
                   </th>
+
+                  
                   {COLS.map(({ label, field }) => {
                     const sortIdx = sorts.findIndex(s => s.field === field);
                     const sort = sortIdx !== -1 ? sorts[sortIdx] : null;
-                    return (
-                      <th
-                        key={field}
-                        className="sortable-th"
-                        onClick={() => toggleSortField(field)}
-                      >
-                        {label}
-                        {sort && (
-                          <span className="sort-indicator">
-                            {sort.dir === 'asc' ? ' ↑' : ' ↓'}
-                            {sorts.length > 1 && (
-                              <sup className="sort-priority">{sortIdx + 1}</sup>
+                    return (                          
+                          <th
+                            key={field}
+                            className="sortable-th"
+                            onClick={() => toggleSortField(field)}
+                          >
+
+                            {label}
+                          <div onClick={e => e.stopPropagation()} style={{ display: 'inline-block' }}>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button style={{ marginLeft: 4 }}>⊞</button>
+                              </PopoverTrigger>
+                              <PopoverContent>
+                                <button onClick={() => clearFiltersForField(field)}>Clear Filters</button>
+                                <ul>
+                                  {allUniqueVals[field].map(cv =>
+                                    <li key={cv} onClick={() => { toggleFilter(cv, field)}}>
+                                      <input type="checkbox" onClick={e => e.stopPropagation()} checked={!!filters[field]?.has(cv)} onChange={() => toggleFilter(cv, field)} />
+                                      {cv}
+                                    </li>
+                                  )}
+                                </ul>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                            {sort && (
+                              <span className="sort-indicator">
+                                {sort.dir === 'asc' ? ' ↑' : ' ↓'}
+                                {sorts.length > 1 && (
+                                  <sup className="sort-priority">{sortIdx + 1}</sup>
+                                )}
+                              </span>
+                              
                             )}
-                          </span>
-                        )}
-                      </th>
+                          </th>
+                        
+                      
                     );
                   })}
                 </tr>
               </thead>
               <tbody>
-                {visible.map(test => (
+                {visible.length === 0 ? (
+                  <tr><td colSpan={COLS.length + 1} style={{ textAlign: 'center', padding: '4rem', color: '#888' }}>No tests match the current filters.</td></tr>
+                ) : visible.map(test => (
                   <tr
                     key={test.id}
                     className={selectedTestsToAdd.has(test.id) ? 'staging-row--selected' : ''}
@@ -317,9 +297,9 @@ export default function UnassignedPane() {
                         onClick={e => e.stopPropagation()}
                       />
                     </td>
+                    <td className="cell--secondary cell--small">{test.project ?? '—'}</td>
                     <td className="cell--mono cell--secondary">{test.sample_id ?? '—'}</td>
                     <td>{test.test_name ?? '—'}</td>
-                    <td className="cell--secondary cell--small">{test.project ?? '—'}</td>
                     <td>{test.available_date ?? '—'}</td>
                     <td>{test.due_date ?? '—'}</td>
                     <td>
@@ -330,7 +310,8 @@ export default function UnassignedPane() {
                       ) : '—'}
                     </td>
                   </tr>
-                ))}
+                ))
+                }
               </tbody>
             </table>
           </div>

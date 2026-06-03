@@ -315,3 +315,9 @@
   color: #999;
   margin: 0;
 }
+
+.tpl-section-desc {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0 0 8px;
+}

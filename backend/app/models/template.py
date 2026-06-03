@@ -1,7 +1,6 @@
 from app.db import Base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from app.models.template_documents import template_documents
 
 
 class Template(Base):
@@ -11,5 +10,6 @@ class Template(Base):
     description = Column(String(255))
     template_tasks = relationship("TemplateTask", back_populates="template", cascade="all, delete-orphan")
     test_name_aliases = relationship("TemplateTestNameAlias", back_populates="template", cascade="all, delete-orphan")
-    documents = relationship("Document", secondary=template_documents)
+    document_patterns = relationship("TemplateDocumentPattern", back_populates="template", cascade="all, delete-orphan")
+
     is_standard = Column(Boolean, default=False, nullable=False)

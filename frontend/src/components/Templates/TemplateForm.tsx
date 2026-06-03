@@ -7,6 +7,12 @@ export interface LocalAlias {
   pattern: string;
 }
 
+export interface LocalDocumentPattern {
+  localId: string;
+  id?: number;
+  document_pattern: string;
+}
+
 export interface LocalTask {
   localId: string;
   id?: number;
@@ -23,8 +29,10 @@ export interface FormSaveData {
   description: string;
   aliases: LocalAlias[];
   tasks: LocalTask[];
+  docPatterns: LocalDocumentPattern[];
   deletedAliasIds: number[];
   deletedTaskIds: number[];
+  deletedDocPatternIds: number[];
 }
 
 interface Props {
@@ -32,6 +40,7 @@ interface Props {
   initialDescription?: string;
   initialAliases?: LocalAlias[];
   initialTasks?: LocalTask[];
+  initialDocPatterns?: LocalDocumentPattern[];
   saving: boolean;
   onSave: (data: FormSaveData) => void;
   onCancel: () => void;
@@ -59,6 +68,7 @@ export default function TemplateForm({
   initialDescription = '',
   initialAliases = [],
   initialTasks = [],
+  initialDocPatterns = [],
   saving,
   onSave,
   onCancel,
@@ -67,8 +77,10 @@ export default function TemplateForm({
   const [description, setDescription] = useState(initialDescription);
   const [aliases, setAliases] = useState<LocalAlias[]>(initialAliases);
   const [tasks, setTasks] = useState<LocalTask[]>(initialTasks);
+  const [docPatterns, setDocPatterns] = useState<LocalDocumentPattern[]>(initialDocPatterns);
   const [deletedAliasIds, setDeletedAliasIds] = useState<number[]>([]);
   const [deletedTaskIds, setDeletedTaskIds] = useState<number[]>([]);
+  const [deletedDocPatternIds, setDeletedDocPatternIds] = useState<number[]>([]);
 
   function addAlias() {
     setAliases(prev => [...prev, { localId: newLocalId(), pattern: '' }]);
@@ -81,6 +93,19 @@ export default function TemplateForm({
 
   function updateAlias(localId: string, pattern: string) {
     setAliases(prev => prev.map(a => a.localId === localId ? { ...a, pattern } : a));
+  }
+
+  function addDocPattern() {
+    setDocPatterns(prev => [...prev, { localId: newLocalId(), document_pattern: '' }]);
+  }
+
+  function removeDocPattern(localId: string, id?: number) {
+    setDocPatterns(prev => prev.filter(p => p.localId !== localId));
+    if (id !== undefined) setDeletedDocPatternIds(prev => [...prev, id]);
+  }
+
+  function updateDocPattern(localId: string, document_pattern: string) {
+    setDocPatterns(prev => prev.map(p => p.localId === localId ? { ...p, document_pattern } : p));
   }
 
   function addTask() {
@@ -114,6 +139,7 @@ export default function TemplateForm({
           <h3 className="tpl-section-title">Test Name Patterns</h3>
           <button className="tpl-add-btn" onClick={addAlias} type="button">+ Add Pattern</button>
         </div>
+        <p className="tpl-section-desc">Add the test names this template covers — when sample tests with matching names are imported, this template will be recommended.</p>
         {aliases.length === 0 ? (
           <p className="tpl-empty">No patterns yet.</p>
         ) : (
@@ -127,6 +153,31 @@ export default function TemplateForm({
                   placeholder="e.g. Tensile*"
                 />
                 <button className="tpl-remove-btn" onClick={() => removeAlias(alias.localId, alias.id)} type="button">✕</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="tpl-section">
+        <div className="tpl-section-header">
+          <h3 className="tpl-section-title">Document Patterns</h3>
+          <button className="tpl-add-btn" onClick={addDocPattern} type="button">+ Add Pattern</button>
+        </div>
+        <p className="tpl-section-desc">Add document IDs this template covers — used to recommend this template when matching documents are associated with sample tests.</p>
+        {docPatterns.length === 0 ? (
+          <p className="tpl-empty">No patterns yet.</p>
+        ) : (
+          <ul className="tpl-aliases">
+            {docPatterns.map(dp => (
+              <li key={dp.localId} className="tpl-alias-row">
+                <input
+                  className="tpl-input"
+                  value={dp.document_pattern}
+                  onChange={e => updateDocPattern(dp.localId, e.target.value)}
+                  placeholder="e.g. DOC-12345"
+                />
+                <button className="tpl-remove-btn" onClick={() => removeDocPattern(dp.localId, dp.id)} type="button">✕</button>
               </li>
             ))}
           </ul>
@@ -175,7 +226,7 @@ export default function TemplateForm({
 
       <div className="tpl-actions">
         <button className="tpl-btn tpl-btn--cancel" onClick={onCancel} type="button">Cancel</button>
-        <button className="tpl-btn tpl-btn--save" onClick={() => onSave({ name, description, aliases, tasks, deletedAliasIds, deletedTaskIds })} disabled={saving} type="button">
+        <button className="tpl-btn tpl-btn--save" onClick={() => onSave({ name, description, aliases, tasks, docPatterns, deletedAliasIds, deletedTaskIds, deletedDocPatternIds })} disabled={saving} type="button">
           {saving ? 'Saving…' : 'Save Template'}
         </button>
       </div>

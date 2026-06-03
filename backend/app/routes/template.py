@@ -12,6 +12,15 @@ def create(data: TemplateCreate, db: Session = Depends(get_db)):
     return template_service.create_template(db, data)
 
 
+
+@router.post("/{template_id}/copy", response_model=TemplateRead)
+def copy_template(template_id: int, db: Session = Depends(get_db)):
+    template = template_service.copy_template(db, template_id)
+    if not template:
+        raise HTTPException(404, "Template not found")
+    return template
+
+
 @router.get("", response_model=list[TemplateRead])
 def list_all(db: Session = Depends(get_db)):
     return template_service.get_templates(db)

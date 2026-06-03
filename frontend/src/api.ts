@@ -16,7 +16,7 @@ export async function get(input: string) {
 
 }
 
-export async function post(input: string, body: Record<string, unknown> = {}) {
+export async function post(input: string, body: object = {}) {
     const url = import.meta.env.VITE_API_URL + input
     try {
         const res = await fetch(url, {

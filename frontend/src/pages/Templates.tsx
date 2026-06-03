@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
-import { get, del } from '../api';
+import { Link, useNavigate } from 'react-router';
+import { get, del, post } from '../api';
 import type { Template, TemplateTask } from '../components/types';
 import '../components/Templates/Templates.css';
 
@@ -9,6 +9,7 @@ export default function Templates() {
   const [taskCounts, setTaskCounts] = useState<Map<number, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
@@ -42,6 +43,17 @@ export default function Templates() {
     }
   }
 
+  async function handleCopyToTemplate(id: number) {
+    try {
+      const newTemplate = await post(`/templates/${id}/copy`);
+      setTemplates(prev => [...prev, newTemplate]);
+      navigate(`/templates/${newTemplate.id}`)
+
+    } catch (e) {
+      alert(`Copying template failed: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+
   if (loading) return <div className="tpl-page">Loading...</div>;
   if (error) return <div className="tpl-page">Failed to load templates.</div>;
 
@@ -72,6 +84,7 @@ export default function Templates() {
                   <td>{taskCounts.get(t.id) ?? 0}</td>
                   <td>
                     <Link to={`/templates/${t.id}`} className="tpl-edit-link">Edit</Link>
+                    <button className="tpl-create-btn" onClick={() => handleCopyToTemplate(t.id)}>Copy To New</button>
                     <button className="tpl-delete-btn" onClick={() => handleDelete(t.id)}>Delete</button>
                   </td>
                 </tr>

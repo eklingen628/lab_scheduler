@@ -39,6 +39,7 @@ export interface SampleTest {
   number_of: number | null
   method: string | null
   available_date: string | null
+  actual_start_date: string | null
 }
 
 export interface Template {
@@ -63,6 +64,12 @@ export interface TemplateTestNameAlias {
   id: number
   template_id: number
   test_name_pattern: string
+}
+
+export interface TemplateDocumentPattern {
+  id: number
+  template_id: number
+  document_pattern: string
 }
 
 export interface SampleTestGroup {

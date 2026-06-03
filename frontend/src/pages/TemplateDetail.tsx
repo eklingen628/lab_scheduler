@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { get, post, patch, del } from '../api';
 import TemplateForm from '../components/Templates/TemplateForm';
-import type { FormSaveData, LocalAlias, LocalTask } from '../components/Templates/TemplateForm';
-import type { Template, TemplateTask, TemplateTestNameAlias } from '../components/types';
+import type { FormSaveData, LocalAlias, LocalTask, LocalDocumentPattern } from '../components/Templates/TemplateForm';
+import type { Template, TemplateTask, TemplateTestNameAlias, TemplateDocumentPattern } from '../components/types';
 import '../components/Templates/Templates.css';
 
 function parseFloat_(s: string): number | null {
@@ -33,12 +33,17 @@ function aliasToLocal(a: TemplateTestNameAlias): LocalAlias {
   return { localId: `existing-${a.id}`, id: a.id, pattern: a.test_name_pattern };
 }
 
+function docPatternToLocal(p: TemplateDocumentPattern): LocalDocumentPattern {
+  return { localId: `existing-${p.id}`, id: p.id, document_pattern: p.document_pattern };
+}
+
 export default function TemplateDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [template, setTemplate] = useState<Template | null>(null);
   const [initialTasks, setInitialTasks] = useState<LocalTask[]>([]);
   const [initialAliases, setInitialAliases] = useState<LocalAlias[]>([]);
+  const [initialDocPatterns, setInitialDocPatterns] = useState<LocalDocumentPattern[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
@@ -46,10 +51,11 @@ export default function TemplateDetail() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [tpl, allTasks, allAliases] = await Promise.all([
+        const [tpl, allTasks, allAliases, allDocPatterns] = await Promise.all([
           get(`/templates/${id}`),
           get('/template-tasks'),
           get('/template-test-name-aliases'),
+          get('/template-document-patterns'),
         ]);
         setTemplate(tpl);
         setInitialTasks(
@@ -57,6 +63,9 @@ export default function TemplateDetail() {
         );
         setInitialAliases(
           (allAliases as TemplateTestNameAlias[]).filter(a => a.template_id === Number(id)).map(aliasToLocal)
+        );
+        setInitialDocPatterns(
+          (allDocPatterns as TemplateDocumentPattern[]).filter(p => p.template_id === Number(id)).map(docPatternToLocal)
         );
       } catch {
         setError(true);
@@ -78,12 +87,18 @@ export default function TemplateDetail() {
       await Promise.all([
         ...data.deletedAliasIds.map(aid => del(`/template-test-name-aliases/${aid}`)),
         ...data.deletedTaskIds.map(tid => del(`/template-tasks/${tid}`)),
+        ...data.deletedDocPatternIds.map(pid => del(`/template-document-patterns/${pid}`)),
       ]);
       await Promise.all([
         ...data.aliases.map(a =>
           a.id
             ? patch(`/template-test-name-aliases/${a.id}`, { test_name_pattern: a.pattern })
             : post('/template-test-name-aliases', { template_id: Number(id), test_name_pattern: a.pattern })
+        ),
+        ...data.docPatterns.map(p =>
+          p.id
+            ? patch(`/template-document-patterns/${p.id}`, { document_pattern: p.document_pattern })
+            : post('/template-document-patterns', { template_id: Number(id), document_pattern: p.document_pattern })
         ),
         ...data.tasks.map(t => {
           const body = {
@@ -116,6 +131,7 @@ export default function TemplateDetail() {
         initialDescription={template.description ?? ''}
         initialAliases={initialAliases}
         initialTasks={initialTasks}
+        initialDocPatterns={initialDocPatterns}
         saving={saving}
         onSave={handleSave}
         onCancel={() => navigate('/templates')}

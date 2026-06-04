@@ -8,18 +8,18 @@ import {
 } from "@/components/ui/popover"
 import type { SampleTest } from '../types';
 
-type SortField = 'sample_id' | 'test_name' | 'project' | 'available_date' | 'due_date' | 'status';
+type SortField = typeof COLS[number]['field']
 type SortDir = 'asc' | 'desc';
 type Sort = { field: SortField; dir: SortDir };
 
-const COLS: { label: string; field: SortField }[] = [
+const COLS = [
   { label: 'Project',        field: 'project'        },
   { label: 'Sample ID',      field: 'sample_id'      },
   { label: 'Test Name',      field: 'test_name'      },
   { label: 'Available Date', field: 'available_date' },
   { label: 'Due Date',       field: 'due_date'       },
   { label: 'Status',         field: 'status'         },
-];
+] as const;
 
 const STATUS_BADGE: Record<string, string> = {
   'Complete':    'badge--success',
@@ -88,9 +88,8 @@ export default function UnassignedPane() {
   }
 
 
-
-  const visible = useMemo(() => {
-    let result = unassigned;
+  function filterRows(rows: SampleTest[], filters: Record<string, Set<string>>, excludeField?: string) {
+    let result = rows
 
     if (search) {
       const q = search.toLowerCase();
@@ -110,19 +109,25 @@ export default function UnassignedPane() {
 
     if (Object.values(filters).reduce((prev, curr) => prev + curr.size, 0) > 0) {
       Object.entries(filters).forEach(([field, filterSet])  => {
-        result = result.filter(t => {
-          const val = t[field as keyof SampleTest]
-          return val !== null && filterSet.has(String(val))
-        }) 
+        if (field !== excludeField) {
+          result = result.filter(t => {
+            const val = t[field as keyof SampleTest]
+            return val !== null && filterSet.has(String(val))
+          })
+        }
       })
 
     }
     if (dueDateFrom) result = result.filter(t => t.due_date !== null && t.due_date >= dueDateFrom);
     if (dueDateTo)   result = result.filter(t => t.due_date !== null && t.due_date <= dueDateTo);
 
-    if (sorts.length === 0) return [...result];
+    return [...result];
 
-    return [...result].sort((a, b) => {
+  }
+
+
+  function sortRows(rows: SampleTest[]) {
+    return [...rows].sort((a, b) => {
       for (const { field, dir } of sorts) {
         const av = a[field];
         const bv = b[field];
@@ -137,13 +142,20 @@ export default function UnassignedPane() {
       }
       return 0;
     });
+
+  }
+
+
+
+  const visible = useMemo(() => {
+    return sortRows(filterRows(unassigned, filters))
   }, [unassigned, search, filters, dueDateFrom, dueDateTo, sorts]);
 
 
   const allUniqueVals = useMemo(() => {
     const uniqueMap: Record<string, Set<string>> = {}
     COLS.forEach(col => {
-      unassigned.forEach(t => {
+      filterRows(unassigned, filters, col.field).forEach(t => {
         const cf = col.field
         const cv = t[cf]
         if (!uniqueMap[cf])
@@ -153,7 +165,7 @@ export default function UnassignedPane() {
         })
     })
     return Object.fromEntries(Object.entries(uniqueMap).map(([key, val]) => [key, [...val].sort()]))
-  }, [unassigned]);
+  }, [unassigned, filters, search, dueDateFrom, dueDateTo,]);
 
 
 
@@ -190,14 +202,15 @@ export default function UnassignedPane() {
 
           <button
             className="control-clear-btn"
-            style={{ visibility: activeFilterCount > 0 ? 'visible' : 'hidden' }}
+            style={{ visibility: activeFilterCount > 0 || search.length > 0 ? 'visible' : 'hidden' }}
             onClick={() => {
               setFilters({});
               setDueDateFrom('');
               setDueDateTo('');
+              setSearch('')
             }}
           >
-            Clear all
+            Clear all filters
           </button>
 
           <button
@@ -205,7 +218,7 @@ export default function UnassignedPane() {
             style={{ visibility: sorts.length > 0 ? 'visible' : 'hidden' }}
             onClick={() => setSorts([])}
           >
-            Clear sort
+            Clear all sorting
           </button>
 
           <input
@@ -254,7 +267,7 @@ export default function UnassignedPane() {
                               <PopoverContent>
                                 <button onClick={() => clearFiltersForField(field)}>Clear Filters</button>
                                 <ul>
-                                  {allUniqueVals[field].map(cv =>
+                                  {allUniqueVals[field]?.map(cv =>
                                     <li key={cv} onClick={() => { toggleFilter(cv, field)}}>
                                       <input type="checkbox" onClick={e => e.stopPropagation()} checked={!!filters[field]?.has(cv)} onChange={() => toggleFilter(cv, field)} />
                                       {cv}

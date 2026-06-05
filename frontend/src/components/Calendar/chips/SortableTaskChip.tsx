@@ -29,6 +29,7 @@ export default function SortableTaskChip({ task }: Props) {
           {...listeners}
           {...attributes}
           style={{ transform: CSS.Transform.toString(transform), transition }}
+          onContextMenu={e => e.stopPropagation()}
         >
           <TaskChip task={task} ghost={isDragging} dimmed={dimmed} highlighted={highlighted} />
         </div>

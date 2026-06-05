@@ -269,7 +269,6 @@ export default function GroupsPane() {
                   inGroup={inGroup}
                   expanded={expandedIds.has(group.id) || autoExpandIds.has(group.id)}
                   onToggle={() => toggleExpanded(group.id)}
-                  searchQuery={search}
                 />
               ))
             )}

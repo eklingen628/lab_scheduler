@@ -41,5 +41,8 @@ export const CalendarContext = createContext({
   setSelectedGroupId: (_: React.SetStateAction<number | null>) => {},
 
   sampleTestsByGroup: new Map<number, SampleTest[]>,
+  viewMode: 'compact' as 'compact' | 'expanded',
+  setViewMode: (_: 'compact' | 'expanded') => {},
+  openCreateModal: () => {},
 
 })

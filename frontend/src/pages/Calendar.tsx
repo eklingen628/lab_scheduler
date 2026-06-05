@@ -80,6 +80,7 @@ export default function Calendar() {
   const searchParamPerson = searchParams.get('person');
   const searchParamDate = searchParams.get('date');
   const handledSearchParams = useRef(false);
+  const [viewMode, setViewMode] = useState<'compact' | 'expanded'>('compact');
 
   useEffect(() => {
     if (!handledSearchParams.current && searchParamPerson && searchParamDate && people.length > 0) {
@@ -416,6 +417,9 @@ export default function Calendar() {
       dayViewPerson,
       dayViewDate,
       sampleTestsByGroup,
+      viewMode,
+      setViewMode,
+      openCreateModal,
     }}>
 
     
@@ -439,10 +443,7 @@ export default function Calendar() {
             onNext={() => setWeekOffset(o => o + 1)}
             onToday={() => setWeekOffset(0)}
           />
-          <DayView
-            sampleTestsByGroup={sampleTestsByGroup}
-            onAddTask={openCreateModal}
-          />
+          {viewMode === 'compact' && <DayView />}
           <DragOverlay dropAnimation={null}>
             {activeTask
               ? activeSource === 'dayview'

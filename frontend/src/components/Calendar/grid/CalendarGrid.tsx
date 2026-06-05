@@ -25,7 +25,7 @@ function localToday(): string {
 const TODAY = localToday();
 
 export default function CalendarGrid() {
-  const { people, dates, taskMap, dayViewPerson, personFilter, setPersonFilter, personSort, setPersonSort, dayViewDate } = useContext(CalendarContext)
+  const { people, dates, taskMap, dayViewPerson, personFilter, setPersonFilter, personSort, setPersonSort, dayViewDate, viewMode } = useContext(CalendarContext)
   const selectedPersonId = dayViewPerson?.id ?? null
   const [popoverOpen, setPopoverOpen] = useState(false)
 
@@ -75,7 +75,7 @@ export default function CalendarGrid() {
   return (
     <div
       className="calendar-grid"
-      style={{ gridTemplateColumns: `140px repeat(${dates.length}, minmax(100px, 1fr))` }}
+      style={{ gridTemplateColumns: `140px repeat(${dates.length}, minmax(${viewMode === 'expanded' ? '400px' : '100px'}, 1fr))` }}
     >
       <div className="calendar-header-cell calendar-header-cell--person">
         <span>Person</span>

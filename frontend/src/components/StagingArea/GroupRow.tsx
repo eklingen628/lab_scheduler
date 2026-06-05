@@ -54,10 +54,9 @@ interface Props {
   inGroup: SampleTest[];
   expanded: boolean;
   onToggle: () => void;
-  searchQuery: string;
 }
 
-export default function GroupRow({ group, inGroup, expanded, onToggle, searchQuery }: Props) {
+export default function GroupRow({ group, inGroup, expanded, onToggle }: Props) {
   const { selectedTestsToAdd, handleAdd, handleRemove, handleDeleteGroup, handleUnschedule, adding, people, setEditingTask } =
     useContext(StagingAreaContext);
 

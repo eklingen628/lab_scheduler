@@ -13,7 +13,7 @@ import { usePersistedState } from '@/components/StagingArea/usePersistedState';
 import '../components/StagingArea/StagingArea.css';
 import { StagingAreaContext } from '@/components/StagingArea/StangingAreaContext';
 
-type PaneMode = 'grouped' | 'flat';
+export type PaneMode = 'grouped' | 'flat';
 
 export default function StagingArea() {
   const [tests, setTests]   = useState<SampleTest[]>([]);

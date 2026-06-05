@@ -4,6 +4,8 @@ import type { Person, Task } from '../../types';
 import SortableTaskChip from '../chips/SortableTaskChip';
 import { memo, useContext } from 'react';
 import { CalendarContext } from '../context/CalendarContext';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+
 
 
 interface Props {
@@ -15,8 +17,8 @@ interface Props {
   isWeekend: boolean;
 }
 
-function CalendarCell({ person, date, cellTasks, isToday, isSelected, isWeekend }: Props) {
-  const { setDayViewPerson, setDayViewDate } = useContext(CalendarContext)
+function CalendarCell({ person, date, cellTasks, isSelected, isWeekend }: Props) {
+  const { setDayViewPerson, setDayViewDate, viewMode, openCreateModal } = useContext(CalendarContext)
 
 
 
@@ -25,8 +27,14 @@ function CalendarCell({ person, date, cellTasks, isToday, isSelected, isWeekend 
   });
 
   return (
+
+
+<ContextMenu>
+  <ContextMenuTrigger asChild>
+
+
     <div
-      className={`calendar-cell${isWeekend ? ' calendar-cell--weekend' : ''}${isToday ? ' calendar-cell--today' : ''}${isSelected ? ' calendar-cell--selected' : ''}${isOver ? ' calendar-cell--over' : ''}`}
+      className={`calendar-cell${viewMode === 'compact' ? ' calendar-cell--compact' : ''}${viewMode === 'expanded' ? ' calendar-cell--expanded' : ''}${isWeekend ? ' calendar-cell--weekend' : ''}${isSelected ? ' calendar-cell--selected' : ''}${isOver ? ' calendar-cell--over' : ''}`}
       ref={setNodeRef}
       data-cell={`${person.id}|${date}`}
       onDoubleClick={() => { setDayViewDate(date); setDayViewPerson(person); }}
@@ -37,6 +45,14 @@ function CalendarCell({ person, date, cellTasks, isToday, isSelected, isWeekend 
         ))}
       </SortableContext>
     </div>
+
+  </ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem onClick={() => { setDayViewDate(null); setDayViewPerson(null); }}>Clear Selection</ContextMenuItem>
+    <ContextMenuItem onClick={() => { setDayViewDate(date); setDayViewPerson(person); }}>Select Cell</ContextMenuItem>
+    <ContextMenuItem onClick={() => { setDayViewDate(date); setDayViewPerson(person); openCreateModal(); }}>Create New Task Here</ContextMenuItem>
+  </ContextMenuContent>
+</ContextMenu>
   );
 }
 

@@ -1,4 +1,5 @@
-type PaneMode = 'grouped' | 'flat';
+import type { PaneMode } from "@/pages/StagingArea";
+
 
 interface Props {
   paneMode: PaneMode;

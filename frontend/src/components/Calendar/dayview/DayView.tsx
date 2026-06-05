@@ -2,25 +2,20 @@ import { useContext } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { X } from 'lucide-react';
-import type { SampleTest } from '../../types'
 import SortableDayViewTask from './SortableDayViewTask';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { CalendarContext } from '../context/CalendarContext';
 
 
-interface Props {
-  sampleTestsByGroup: Map<number, SampleTest[]>;
-  onAddTask: () => void;
-}
 
 function formatDate(iso: string): string {
   const d = new Date(iso + 'T00:00:00');
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
-export default function DayView({ sampleTestsByGroup, onAddTask }: Props) {
-  const { dayViewPerson, dayViewDate, tasks, setDayViewPerson, setDayViewDate, onEditTask } = useContext(CalendarContext);
+export default function DayView() {
+  const { dayViewPerson, dayViewDate, tasks, setDayViewPerson, setDayViewDate, onEditTask, sampleTestsByGroup, openCreateModal } = useContext(CalendarContext);
   const active = dayViewPerson !== null && dayViewDate !== null;
 
   const { setNodeRef } = useDroppable({
@@ -47,7 +42,7 @@ export default function DayView({ sampleTestsByGroup, onAddTask }: Props) {
             )}
           </div>
           <div className="day-view-header-actions">
-            <Button variant="outline" size="sm" onClick={onAddTask}>+ Add Task</Button>
+            <Button variant="outline" size="sm" onClick={openCreateModal}>+ Add Task</Button>
             {active && (
               <Button variant="ghost" size="icon-sm" onClick={() => { setDayViewDate(null); setDayViewPerson(null); }}>
                 <X />

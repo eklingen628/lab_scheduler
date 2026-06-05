@@ -28,7 +28,7 @@
   color: #444;
 }
 
-.calendar-week-nav button {
+.calendar-nav-btn {
   background: none;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -39,7 +39,7 @@
   line-height: 1.6;
 }
 
-.calendar-week-nav button:hover:not(:disabled) {
+.calendar-nav-btn:hover:not(:disabled) {
   background: #f4f4f4;
 }
 
@@ -50,7 +50,6 @@
 
 .calendar-grid {
   display: grid;
-  border-left: 1px solid #ddd;
 }
 
 .calendar-header-cell {
@@ -72,6 +71,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  left: 0;
+  z-index: 2;
 }
 
 .calendar-filter-btn {
@@ -224,14 +225,17 @@
   font-weight: 500;
   color: #333;
   background: #fafafa;
-  border-right: 1px solid #ddd;
+  box-shadow: 1px 0 0 #ddd;
   border-bottom: 1px solid #ddd;
   display: flex;
   align-items: flex-start;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  border-left: 1px solid #ddd
 }
 
 .calendar-cell {
-  min-height: 120px;
   padding: 4px 4px 40px;
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
@@ -240,6 +244,16 @@
   gap: 3px;
   background: #fff;
   transition: background 0.1s;
+}
+
+.calendar-cell--compact {
+  min-height: 120px;
+
+}
+
+.calendar-cell--expanded {
+  min-height: 300px;
+
 }
 
 .calendar-cell--today {

@@ -182,7 +182,7 @@ export default function TaskEditModal({ task, open, initialPersonId, initialDate
     <Dialog open={open} onOpenChange={open => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isCreate ? 'New Task' : task.sample_test_group_id ? 'Edit Task - Group Task' : 'Edit Task - Ad Hoc Task'}</DialogTitle>
+          <DialogTitle>{isCreate ? 'New Task (Ad Hoc Task)' : task.sample_test_group_id ? 'Edit Task (Group Task)' : 'Edit Task (Ad Hoc Task)'}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-3 py-2">
           <div className="grid grid-cols-[120px_1fr] items-center gap-2">

@@ -50,7 +50,15 @@ const collisionDetection: CollisionDetection = (args) => {
   }
   const sidebarHit = pointerWithin(args).find(c => c.id === 'sidebar');
   if (sidebarHit) return [sidebarHit];
-  return closestCenter(args);
+  const cellOnly = {
+    ...args,
+    droppableContainers: args.droppableContainers.filter(
+      c => typeof c.id === 'string' && c.id.startsWith('cell|')
+    ),
+  };
+  const within = pointerWithin(cellOnly);
+  if (within.length > 0) return within;
+  return closestCenter(cellOnly);
 };
 
 export default function Calendar() {
@@ -171,10 +179,9 @@ export default function Calendar() {
     const source = event.active.data.current?.source;
     if (source === 'sidebar') return;
 
-    const { active, over } = event;
+    const { over } = event;
     if (!over) return;
 
-    const activeId = Number(active.id);
     const overId = over.id;
 
     if (overId === 'sidebar') return;
@@ -197,51 +204,6 @@ export default function Calendar() {
       return;
     }
 
-    setTasks(prev => {
-      const activeIdx = prev.findIndex(t => t.id === activeId);
-      if (activeIdx === -1) return prev;
-      const activeTask = prev[activeIdx];
-
-      let overPersonId: number;
-      let overDate: string;
-
-      if (typeof overId === 'string' && overId.startsWith('cell|')) {
-        const [, personIdStr, date] = overId.split('|');
-        overPersonId = Number(personIdStr);
-        overDate = date;
-      } else {
-        const overTask = prev.find(t => t.id === Number(overId));
-        if (!overTask || overTask.person_id === null || overTask.scheduled_date === null) return prev;
-        overPersonId = overTask.person_id;
-        overDate = overTask.scheduled_date;
-      }
-
-      const crossCell =
-        activeTask.person_id !== overPersonId || activeTask.scheduled_date !== overDate;
-
-      if (!crossCell && typeof overId === 'string' && overId.startsWith('cell|')) {
-        return prev;
-      }
-      
-
-      let next = crossCell
-        ? prev.map(t =>
-            t.id === activeId
-              ? { ...t, person_id: overPersonId, scheduled_date: overDate }
-              : t
-          )
-        : [...prev];
-
-      if (typeof overId !== 'string' || !overId.startsWith('cell|')) {
-        const newActiveIdx = next.findIndex(t => t.id === activeId);
-        const overIdx = next.findIndex(t => t.id === Number(overId));
-        if (newActiveIdx !== overIdx) {
-          return arrayMove(next, newActiveIdx, overIdx);
-        }
-      }
-
-      return next;
-    });
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -310,10 +272,51 @@ export default function Calendar() {
       return;
     }
 
-    const afterPositions = computePositions(tasks);
+    if (source === 'dayview') {
+      const afterPositions = computePositions(tasks);
+      const beforePositions = computePositions(before);
+      const changed = tasks.filter(task => {
+        const prev = before.find(t => t.id === task.id);
+        if (!prev) return false;
+        return (
+          task.person_id !== prev.person_id ||
+          task.scheduled_date !== prev.scheduled_date ||
+          afterPositions.get(task.id) !== beforePositions.get(task.id)
+        );
+      });
+      if (changed.length === 0) return;
+      const results = await Promise.all(
+        changed.map(task =>
+          patch(`/tasks/${task.id}`, {
+            person_id: task.person_id,
+            scheduled_date: task.scheduled_date,
+            position: afterPositions.get(task.id),
+          })
+        )
+      );
+      if (results.some(r => !r)) setTasks(before);
+      else fetchGroups();
+      return;
+    }
+
+    // Calendar grid: derive destination from the drop event
+    const activeId = Number(event.active.id);
+    let overPersonId: number;
+    let overDate: string;
+
+    if (typeof overId !== 'string' || !overId.startsWith('cell|')) return;
+    const [, personIdStr, date] = overId.split('|');
+    overPersonId = Number(personIdStr);
+    overDate = date;
+
+    const finalTasks = before.map(t =>
+      t.id === activeId ? { ...t, person_id: overPersonId, scheduled_date: overDate } : t
+    );
+
+    const afterPositions = computePositions(finalTasks);
     const beforePositions = computePositions(before);
 
-    const changed = tasks.filter(task => {
+    const changed = finalTasks.filter(task => {
       const prev = before.find(t => t.id === task.id);
       if (!prev) return false;
       return (
@@ -338,6 +341,7 @@ export default function Calendar() {
     if (results.some(r => !r)) {
       setTasks(before);
     } else {
+      setTasks(finalTasks);
       fetchGroups();
     }
   }

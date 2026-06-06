@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { DndContext, DragOverlay, closestCenter, pointerWithin } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent, DragOverEvent, CollisionDetection, Modifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -38,28 +38,6 @@ const dayviewVerticalOnly: Modifier = ({ transform, active }) => {
   return transform;
 };
 
-const collisionDetection: CollisionDetection = (args) => {
-  if (args.active?.data?.current?.source === 'dayview') {
-    const filtered = {
-      ...args,
-      droppableContainers: args.droppableContainers.filter(
-        c => typeof c.id !== 'string' || (!c.id.startsWith('cell|') && c.id !== 'sidebar')
-      ),
-    };
-    return closestCenter(filtered);
-  }
-  const sidebarHit = pointerWithin(args).find(c => c.id === 'sidebar');
-  if (sidebarHit) return [sidebarHit];
-  const cellOnly = {
-    ...args,
-    droppableContainers: args.droppableContainers.filter(
-      c => typeof c.id === 'string' && c.id.startsWith('cell|')
-    ),
-  };
-  const within = pointerWithin(cellOnly);
-  if (within.length > 0) return within;
-  return closestCenter(cellOnly);
-};
 
 export default function Calendar() {
   const [weekOffset, setWeekOffset] = useState(0);
@@ -142,7 +120,7 @@ export default function Calendar() {
       const map: Record<number, Record<string, Task[]>> = {}
       tasks.forEach(task => {
         if (task.person_id && task.scheduled_date) {
-          if (!(task.person_id in map)) 
+          if (!(task.person_id in map))
             map[task.person_id] = {};
           if (!(task.scheduled_date in map[task.person_id]))
             map[task.person_id][task.scheduled_date] = []
@@ -153,6 +131,40 @@ export default function Calendar() {
       return map;
     }, [tasks])
 
+  const taskMapRef = useRef(taskMap);
+  taskMapRef.current = taskMap;
+  const dragSourceCellRef = useRef<string | null>(null);
+
+  const collisionDetection = useCallback<CollisionDetection>((args) => {
+    if (args.active?.data?.current?.source === 'dayview') {
+      return closestCenter({
+        ...args,
+        droppableContainers: args.droppableContainers.filter(
+          c => typeof c.id !== 'string' || (!c.id.startsWith('cell|') && c.id !== 'sidebar')
+        ),
+      });
+    }
+    const sidebarHit = pointerWithin(args).find(c => c.id === 'sidebar');
+    if (sidebarHit) return [sidebarHit];
+
+    const sourceCell = dragSourceCellRef.current;
+    let sourceCellTaskIds = new Set<number>();
+    if (sourceCell) {
+      const [personIdStr, cellDate] = sourceCell.split('|');
+      const cellTasks = taskMapRef.current[Number(personIdStr)]?.[cellDate] ?? [];
+      sourceCellTaskIds = new Set(cellTasks.map(t => t.id));
+    }
+
+    const allowed = args.droppableContainers.filter(c => {
+      if (typeof c.id === 'string' && c.id.startsWith('cell|')) return true;
+      return typeof c.id === 'number' && sourceCellTaskIds.has(c.id);
+    });
+
+    const within = pointerWithin({ ...args, droppableContainers: allowed });
+    if (within.length > 0) return within;
+    return closestCenter({ ...args, droppableContainers: allowed });
+  }, []);
+
   function handleDragStart(event: DragStartEvent) {
     const source = event.active.data.current?.source;
     setActiveSource(source ?? null);
@@ -161,7 +173,12 @@ export default function Calendar() {
     } else if (source === 'dayview') {
       setActiveTask(tasks.find(t => t.id === event.active.data.current?.taskId) ?? null);
     } else {
-      setActiveTask(tasks.find(t => t.id === Number(event.active.id)) ?? null);
+      const taskId = Number(event.active.id);
+      const task = tasks.find(t => t.id === taskId);
+      setActiveTask(task ?? null);
+      if (task?.person_id && task?.scheduled_date) {
+        dragSourceCellRef.current = `${task.person_id}|${task.scheduled_date}`;
+      }
     }
     setTasksBeforeDrag(tasks);
   }
@@ -169,6 +186,7 @@ export default function Calendar() {
   function handleDragCancel() {
     setActiveTask(null);
     setActiveSource(null);
+    dragSourceCellRef.current = null;
     if (tasksBeforeDrag) {
       setTasks(tasksBeforeDrag);
       setTasksBeforeDrag(null);
@@ -211,6 +229,7 @@ export default function Calendar() {
     setActiveSource(null);
     const before = tasksBeforeDrag;
     setTasksBeforeDrag(null);
+    dragSourceCellRef.current = null;
 
     const source = event.active.data.current?.source;
 
@@ -299,8 +318,30 @@ export default function Calendar() {
       return;
     }
 
-    // Calendar grid: derive destination from the drop event
+    // Calendar grid: same-cell reorder (dropped on a chip)
     const activeId = Number(event.active.id);
+    if (typeof overId === 'number') {
+      const activeIdx = before.findIndex(t => t.id === activeId);
+      const overIdx = before.findIndex(t => t.id === overId);
+      if (activeIdx === -1 || overIdx === -1 || activeIdx === overIdx) return;
+      const finalTasks = arrayMove(before, activeIdx, overIdx);
+      const afterPositions = computePositions(finalTasks);
+      const beforePositions = computePositions(before);
+      const changed = finalTasks.filter(task => {
+        const prev = before.find(t => t.id === task.id);
+        if (!prev) return false;
+        return afterPositions.get(task.id) !== beforePositions.get(task.id);
+      });
+      if (changed.length === 0) return;
+      const results = await Promise.all(
+        changed.map(task => patch(`/tasks/${task.id}`, { position: afterPositions.get(task.id) }))
+      );
+      if (results.some(r => !r)) setTasks(before);
+      else { setTasks(finalTasks); fetchGroups(); }
+      return;
+    }
+
+    // Calendar grid: cross-cell move (dropped on a cell droppable)
     let overPersonId: number;
     let overDate: string;
 
@@ -309,9 +350,8 @@ export default function Calendar() {
     overPersonId = Number(personIdStr);
     overDate = date;
 
-    const finalTasks = before.map(t =>
-      t.id === activeId ? { ...t, person_id: overPersonId, scheduled_date: overDate } : t
-    );
+    const movedTask = { ...before.find(t => t.id === activeId)!, person_id: overPersonId, scheduled_date: overDate };
+    const finalTasks = [...before.filter(t => t.id !== activeId), movedTask];
 
     const afterPositions = computePositions(finalTasks);
     const beforePositions = computePositions(before);
